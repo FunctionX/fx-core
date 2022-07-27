@@ -1,6 +1,7 @@
 package keeper_test
 
-import "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
+//import "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
+import "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 func (suite *KeeperTestSuite) TestParams() {
 	expParams := types.DefaultParams()

@@ -3,13 +3,13 @@ package keeper
 import (
 	"encoding/hex"
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/functionx/fx-core/v2/x/crosschain/types"
-	ibctransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 func (k Keeper) GetBridgeTokenDenom(ctx sdk.Context, tokenContract string) *types.BridgeToken {
@@ -53,7 +53,7 @@ func (k Keeper) AddBridgeToken(ctx sdk.Context, token, channelIBC string) (strin
 	decodeChannelIBCStr := string(decodeChannelIBC)
 	denom := fmt.Sprintf("%s%s", k.moduleName, token)
 	if len(decodeChannelIBCStr) > 0 {
-		denomTrace := ibctransfertypes.DenomTrace{
+		denomTrace := transfertypes.DenomTrace{
 			Path:      decodeChannelIBCStr,
 			BaseDenom: denom,
 		}

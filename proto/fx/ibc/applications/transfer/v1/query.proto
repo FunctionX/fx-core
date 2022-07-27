@@ -1,36 +1,25 @@
 syntax = "proto3";
 package fx.ibc.applications.transfer.v1;
 
-import "gogoproto/gogo.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
-import "fx/ibc/applications/transfer/v1/transfer.proto";
-import "google/api/annotations.proto";
-import "ibc.applications.transfer.v1.query.proto";
+import "ibc/applications/transfer/v1/query.proto";
 
 option go_package = "github.com/functionx/fx-core/x/ibc/applications/transfer/types";
 
 // Query provides defines the gRPC querier service.
 service Query {
   // DenomTrace queries a denomination trace information.
-  rpc DenomTrace(QueryDenomTraceRequest) returns (QueryDenomTraceResponse) {
-    option (google.api.http).get =
-        "fx/ibc/applications/transfer/v1beta1/denom_traces/{hash}";
-  }
+  rpc DenomTrace(ibc.applications.transfer.v1.QueryDenomTraceRequest)
+      returns (ibc.applications.transfer.v1.QueryDenomTraceResponse) {}
 
   // DenomTraces queries all denomination traces.
-  rpc DenomTraces(QueryDenomTracesRequest) returns (QueryDenomTracesResponse) {
-    option (google.api.http).get =
-        "fx/ibc/applications/transfer/v1beta1/denom_traces";
-  }
+  rpc DenomTraces(ibc.applications.transfer.v1.QueryDenomTracesRequest)
+      returns (ibc.applications.transfer.v1.QueryDenomTracesResponse) {}
 
   // Params queries all parameters of the ibc-transfer module.
-  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "fx/ibc/applications/transfer/v1beta1/params";
-  }
+  rpc Params(ibc.applications.transfer.v1.QueryParamsRequest)
+      returns (ibc.applications.transfer.v1.QueryParamsResponse) {}
 
   // DenomHash queries a denomination hash information.
-  rpc DenomHash(QueryDenomHashRequest) returns (QueryDenomHashResponse) {
-    option (google.api.http).get =
-        "fx/ibc/applications/transfer/v1beta1/denom_hashes/{trace}";
-  }
+  rpc DenomHash(ibc.applications.transfer.v1.QueryDenomHashRequest)
+      returns (ibc.applications.transfer.v1.QueryDenomHashResponse) {}
 }

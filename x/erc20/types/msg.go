@@ -4,12 +4,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	fxtypes "github.com/functionx/fx-core/v2/types"
 
 	"github.com/ethereum/go-ethereum/common"
-
-	ibctransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 var (
@@ -48,7 +47,7 @@ func (m MsgConvertCoin) ValidateBasic() error {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid receiver address %s", err.Error())
 	}
 	if err = ValidateErc20Denom(m.Coin.Denom); err != nil {
-		if err = ibctransfertypes.ValidateIBCDenom(m.Coin.Denom); err != nil {
+		if err = transfertypes.ValidateIBCDenom(m.Coin.Denom); err != nil {
 			return sdkerrors.Wrapf(sdkerrors.ErrInvalidCoins, "invalid coin denom %s", err.Error())
 		}
 	}

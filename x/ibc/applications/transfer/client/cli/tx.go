@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strings"
 	"time"
 
@@ -55,7 +56,7 @@ to the counterparty channel. Any timeout set to 0 is disabled.`),
 			}
 
 			if !strings.HasPrefix(coin.Denom, "ibc/") {
-				denomTrace := types.ParseDenomTrace(coin.Denom)
+				denomTrace := transfertypes.ParseDenomTrace(coin.Denom)
 				coin.Denom = denomTrace.IBCDenom()
 			}
 

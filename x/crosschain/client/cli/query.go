@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,6 @@ import (
 	abcitype "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/functionx/fx-core/v2/x/crosschain/types"
-	types2 "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 const (
@@ -868,7 +868,7 @@ func CmdCovertBridgeToken() *cobra.Command {
 			}
 			coinName := fmt.Sprintf("%s%s", chainName, tokenContract)
 			if len(channelIbc) > 0 {
-				coinName = types2.DenomTrace{
+				coinName = transfertypes.DenomTrace{
 					Path:      channelIbc,
 					BaseDenom: coinName,
 				}.IBCDenom()

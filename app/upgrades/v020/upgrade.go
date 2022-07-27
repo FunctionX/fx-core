@@ -2,16 +2,15 @@ package v020
 
 import (
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"reflect"
 	"strings"
 	"time"
 
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v3/modules/core/03-connection/types"
 
-	ibctransferkeeper "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/keeper"
-	ibctransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
+	ibctransferkeeper "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/keeper"
 
 	bsctypes "github.com/functionx/fx-core/v2/x/bsc/types"
 	polygontypes "github.com/functionx/fx-core/v2/x/polygon/types"
@@ -122,14 +121,14 @@ func ibcMigrate(ctx sdk.Context, ibcKeeper *ibckeeper.Keeper, transferKeeper ibc
 
 	// list of traces that must replace the old traces in store
 	// https://github.com/cosmos/ibc-go/blob/v3.1.0/docs/migrations/support-denoms-with-slashes.md
-	var newTraces []ibctransfertypes.DenomTrace
+	var newTraces []transfertypes.DenomTrace
 	transferKeeper.IterateDenomTraces(ctx,
-		func(dt ibctransfertypes.DenomTrace) bool {
+		func(dt transfertypes.DenomTrace) bool {
 			// check if the new way of splitting FullDenom
 			// into Trace and BaseDenom passes validation and
 			// is the same as the current DenomTrace.
 			// If it isn't then store the new DenomTrace in the list of new traces.
-			newTrace := ibctransfertypes.ParseDenomTrace(dt.GetFullDenomPath())
+			newTrace := transfertypes.ParseDenomTrace(dt.GetFullDenomPath())
 			if err := newTrace.Validate(); err == nil && !reflect.DeepEqual(newTrace, dt) {
 				newTraces = append(newTraces, newTrace)
 			}

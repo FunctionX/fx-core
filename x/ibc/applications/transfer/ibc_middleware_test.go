@@ -2,6 +2,7 @@ package transfer_test
 
 import (
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"math"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 
 	_ "github.com/functionx/fx-core/v2/app"
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 	ibctesting "github.com/functionx/fx-core/v2/x/ibc/testing"
 )
 
@@ -78,7 +78,7 @@ func (suite *TransferTestSuite) TestOnChanOpenInit() {
 				Ordering:       channeltypes.UNORDERED,
 				Counterparty:   counterparty,
 				ConnectionHops: []string{path.EndpointA.ConnectionID},
-				Version:        types.Version,
+				Version:        transfertypes.Version,
 			}
 
 			module, _, err := suite.chainA.App.GetIBCKeeper().PortKeeper.LookupModuleByPort(suite.chainA.GetContext(), ibctesting.TransferPort)
@@ -167,9 +167,9 @@ func (suite *TransferTestSuite) TestOnChanOpenTry() {
 				Ordering:       channeltypes.UNORDERED,
 				Counterparty:   counterparty,
 				ConnectionHops: []string{path.EndpointA.ConnectionID},
-				Version:        types.Version,
+				Version:        transfertypes.Version,
 			}
-			counterpartyVersion = types.Version
+			counterpartyVersion = transfertypes.Version
 
 			module, _, err := suite.chainA.App.GetIBCKeeper().PortKeeper.LookupModuleByPort(suite.chainA.GetContext(), ibctesting.TransferPort)
 			suite.Require().NoError(err)
@@ -188,7 +188,7 @@ func (suite *TransferTestSuite) TestOnChanOpenTry() {
 
 			if tc.expPass {
 				suite.Require().NoError(err)
-				suite.Require().Equal(types.Version, version)
+				suite.Require().Equal(transfertypes.Version, version)
 			} else {
 				suite.Require().Error(err)
 				suite.Require().Equal("", version)
@@ -226,7 +226,7 @@ func (suite *TransferTestSuite) TestOnChanOpenAck() {
 			path := NewTransferPath(suite.chainA, suite.chainB)
 			suite.coordinator.SetupConnections(path)
 			path.EndpointA.ChannelID = ibctesting.FirstChannelID
-			counterpartyVersion = types.Version
+			counterpartyVersion = transfertypes.Version
 
 			module, _, err := suite.chainA.App.GetIBCKeeper().PortKeeper.LookupModuleByPort(suite.chainA.GetContext(), ibctesting.TransferPort)
 			suite.Require().NoError(err)
@@ -366,7 +366,7 @@ func TestGetDenomByIBCPacket(t *testing.T) {
 			destPort:      "transfer",
 			destChannel:   "channel-1",
 			packetDenom:   "atom",
-			expDenom:      types.ParseDenomTrace(fmt.Sprintf("%s/%s/%s", "transfer", "channel-1", "atom")).IBCDenom(),
+			expDenom:      transfertypes.ParseDenomTrace(fmt.Sprintf("%s/%s/%s", "transfer", "channel-1", "atom")).IBCDenom(),
 		},
 		{
 			name:          "dest token - ibc denom a->b  b->c",
@@ -375,7 +375,7 @@ func TestGetDenomByIBCPacket(t *testing.T) {
 			destPort:      "transfer",
 			destChannel:   "channel-1",
 			packetDenom:   "transfer/channel-2/atom",
-			expDenom:      types.ParseDenomTrace(fmt.Sprintf("%s/%s/%s", "transfer", "channel-1", "transfer/channel-2/atom")).IBCDenom(),
+			expDenom:      transfertypes.ParseDenomTrace(fmt.Sprintf("%s/%s/%s", "transfer", "channel-1", "transfer/channel-2/atom")).IBCDenom(),
 		},
 	}
 

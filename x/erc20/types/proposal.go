@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,7 +11,6 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	fxtypes "github.com/functionx/fx-core/v2/types"
-	ibctransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 func init() {
@@ -77,7 +77,7 @@ func (rtbp *RegisterCoinProposal) ValidateBasic() error {
 		return err
 	}
 
-	if err := ibctransfertypes.ValidateIBCDenom(rtbp.Metadata.Base); err != nil {
+	if err := transfertypes.ValidateIBCDenom(rtbp.Metadata.Base); err != nil {
 		return err
 	}
 
@@ -97,7 +97,7 @@ func validateIBC(metadata banktypes.Metadata) error {
 		return nil
 	}
 
-	if len(denomSplit) != 2 || denomSplit[0] != ibctransfertypes.DenomPrefix {
+	if len(denomSplit) != 2 || denomSplit[0] != transfertypes.DenomPrefix {
 		// NOTE: should be unaccessible (covered on ValidateIBCDenom)
 		return fmt.Errorf("invalid metadata. %s denomination should be prefixed with the format 'ibc/", metadata.Base)
 	}

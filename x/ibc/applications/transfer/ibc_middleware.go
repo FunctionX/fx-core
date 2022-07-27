@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/functionx/fx-core/v2/x/ibc"
 
@@ -67,7 +67,7 @@ func (im IBCMiddleware) OnRecvPacket(
 
 	var data types.FungibleTokenPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		var ibcPacketData ibctransfertypes.FungibleTokenPacketData
+		var ibcPacketData transfertypes.FungibleTokenPacketData
 		if err = types.ModuleCdc.UnmarshalJSON(packet.GetData(), &ibcPacketData); err != nil {
 			ack = channeltypes.NewErrorAcknowledgement("cannot unmarshal ICS-20 transfer packet data")
 		} else {
@@ -97,18 +97,18 @@ func (im IBCMiddleware) OnRecvPacket(
 		}
 
 		if err != nil {
-			ack = types.NewErrorAcknowledgement(err)
+			ack = transfertypes.NewErrorAcknowledgement(err)
 		}
 	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypePacket,
+			transfertypes.EventTypePacket,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyReceiver, data.Receiver),
-			sdk.NewAttribute(types.AttributeKeyDenom, data.Denom),
-			sdk.NewAttribute(types.AttributeKeyAmount, data.Amount),
-			sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", ack.Success())),
+			sdk.NewAttribute(transfertypes.AttributeKeyReceiver, data.Receiver),
+			sdk.NewAttribute(transfertypes.AttributeKeyDenom, data.Denom),
+			sdk.NewAttribute(transfertypes.AttributeKeyAmount, data.Amount),
+			sdk.NewAttribute(transfertypes.AttributeKeyAckSuccess, fmt.Sprintf("%t", ack.Success())),
 		),
 	)
 
@@ -138,12 +138,12 @@ func (im IBCMiddleware) OnAcknowledgementPacket(
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypePacket,
+			transfertypes.EventTypePacket,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyReceiver, data.Receiver),
-			sdk.NewAttribute(types.AttributeKeyDenom, data.Denom),
-			sdk.NewAttribute(types.AttributeKeyAmount, data.Amount),
-			sdk.NewAttribute(types.AttributeKeyAck, ack.String()),
+			sdk.NewAttribute(transfertypes.AttributeKeyReceiver, data.Receiver),
+			sdk.NewAttribute(transfertypes.AttributeKeyDenom, data.Denom),
+			sdk.NewAttribute(transfertypes.AttributeKeyAmount, data.Amount),
+			sdk.NewAttribute(transfertypes.AttributeKeyAck, ack.String()),
 		),
 	)
 
@@ -151,14 +151,14 @@ func (im IBCMiddleware) OnAcknowledgementPacket(
 	case *channeltypes.Acknowledgement_Result:
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				types.EventTypePacket,
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, string(resp.Result)),
+				transfertypes.EventTypePacket,
+				sdk.NewAttribute(transfertypes.AttributeKeyAckSuccess, string(resp.Result)),
 			),
 		)
 	case *channeltypes.Acknowledgement_Error:
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				types.EventTypePacket,
+				transfertypes.EventTypePacket,
 				sdk.NewAttribute(types.AttributeKeyAckError, resp.Error),
 			),
 		)
@@ -184,11 +184,11 @@ func (im IBCMiddleware) OnTimeoutPacket(
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypeTimeout,
+			transfertypes.EventTypeTimeout,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyRefundReceiver, data.Sender),
-			sdk.NewAttribute(types.AttributeKeyRefundDenom, data.Denom),
-			sdk.NewAttribute(types.AttributeKeyRefundAmount, data.Amount),
+			sdk.NewAttribute(transfertypes.AttributeKeyRefundReceiver, data.Sender),
+			sdk.NewAttribute(transfertypes.AttributeKeyRefundDenom, data.Denom),
+			sdk.NewAttribute(transfertypes.AttributeKeyRefundAmount, data.Amount),
 		),
 	)
 
@@ -228,7 +228,7 @@ func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet chan
 		// parse the transfer amount
 		transferAmount, ok := sdk.NewIntFromString(data.Amount)
 		if !ok {
-			return sdkerrors.Wrapf(types.ErrInvalidAmount, "unable to parse forward transfer amount (%s) into sdk.Int", data.Amount)
+			return sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse forward transfer amount (%s) into sdk.Int", data.Amount)
 		}
 
 		var token = sdk.NewCoin(denom, transferAmount)
@@ -258,8 +258,8 @@ func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet chan
 func GetDenomByIBCPacket(sourcePort, sourceChannel, destPort, destChannel, packetDenom string) string {
 	var denom string
 
-	if types.ReceiverChainIsSource(sourcePort, sourceChannel, packetDenom) {
-		voucherPrefix := types.GetDenomPrefix(sourcePort, sourceChannel)
+	if transfertypes.ReceiverChainIsSource(sourcePort, sourceChannel, packetDenom) {
+		voucherPrefix := transfertypes.GetDenomPrefix(sourcePort, sourceChannel)
 		unPrefixedDenom := packetDenom[len(voucherPrefix):]
 
 		// coin denomination used in sending from the escrow address
@@ -267,18 +267,18 @@ func GetDenomByIBCPacket(sourcePort, sourceChannel, destPort, destChannel, packe
 
 		// The denomination used to send the coins is either the native denom or the hash of the path
 		// if the denomination is not native.
-		denomTrace := types.ParseDenomTrace(unPrefixedDenom)
+		denomTrace := transfertypes.ParseDenomTrace(unPrefixedDenom)
 		if denomTrace.Path != "" {
 			denom = denomTrace.IBCDenom()
 		}
 	} else {
 		// since SendPacket did not prefix the denomination, we must prefix denomination here
-		sourcePrefix := types.GetDenomPrefix(destPort, destChannel)
+		sourcePrefix := transfertypes.GetDenomPrefix(destPort, destChannel)
 		// NOTE: sourcePrefix contains the trailing "/"
 		prefixedDenom := sourcePrefix + packetDenom
 
 		// construct the denomination trace from the full raw denomination
-		denom = types.ParseDenomTrace(prefixedDenom).IBCDenom()
+		denom = transfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
 	}
 	return denom
 }

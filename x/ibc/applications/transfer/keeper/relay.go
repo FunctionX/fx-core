@@ -11,6 +11,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 
 	"github.com/armon/go-metrics"
@@ -73,7 +74,7 @@ func (k Keeper) SendFxTransfer(
 ) error {
 
 	if !k.GetSendEnabled(ctx) {
-		return types.ErrSendDisabled
+		return transfertypes.ErrSendDisabled
 	}
 
 	sourceChannelEnd, found := k.channelKeeper.GetChannel(ctx, sourcePort, sourceChannel)
@@ -130,11 +131,11 @@ func (k Keeper) SendFxTransfer(
 	// NOTE: SendTransfer simply sends the denomination as it exists on its own
 	// chain inside the packet data. The receiving chain will perform denom
 	// prefixing as necessary.
-	if types.SenderChainIsSource(sourcePort, sourceChannel, fullDenomPath) {
+	if transfertypes.SenderChainIsSource(sourcePort, sourceChannel, fullDenomPath) {
 		labels = append(labels, telemetry.NewLabel(coretypes.LabelSource, "true"))
 
 		// create the escrow address for the tokens
-		escrowAddress := types.GetEscrowAddress(sourcePort, sourceChannel)
+		escrowAddress := transfertypes.GetEscrowAddress(sourcePort, sourceChannel)
 
 		// escrow source tokens. It fails if balance insufficient.
 		if err = k.bankKeeper.SendCoins(
@@ -148,13 +149,13 @@ func (k Keeper) SendFxTransfer(
 
 		// transfer the coins to the module account and burn them
 		if err = k.bankKeeper.SendCoinsFromAccountToModule(
-			ctx, sender, types.ModuleName, sdk.NewCoins(token),
+			ctx, sender, transfertypes.ModuleName, sdk.NewCoins(token),
 		); err != nil {
 			return err
 		}
 
 		if err = k.bankKeeper.BurnCoins(
-			ctx, types.ModuleName, sdk.NewCoins(token),
+			ctx, transfertypes.ModuleName, sdk.NewCoins(token),
 		); err != nil {
 			// NOTE: should not happen as the module account was
 			// retrieved on the step above and it has enough balace
@@ -180,7 +181,7 @@ func (k Keeper) SendFxTransfer(
 
 	defer func() {
 		telemetry.IncrCounterWithLabels(
-			[]string{"ibc", types.ModuleName, "send"},
+			[]string{"ibc", transfertypes.ModuleName, "send"},
 			1,
 			labels,
 		)
@@ -201,7 +202,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 	}
 
 	if !k.GetReceiveEnabled(ctx) {
-		return types.ErrReceiveDisabled
+		return transfertypes.ErrReceiveDisabled
 	}
 
 	var receiver sdk.AccAddress
@@ -214,7 +215,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		receiver = addressBytes
 		ok := false
 		if feeAmount, ok = sdk.NewIntFromString(data.Fee); !ok {
-			return sdkerrors.Wrapf(types.ErrInvalidAmount, "fee amount is invalid:%s", data.Fee)
+			return sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "fee amount is invalid:%s", data.Fee)
 		}
 	} else {
 		// decode the receiver address
@@ -228,7 +229,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 	// parse the transfer amount
 	transferAmount, ok := sdk.NewIntFromString(data.Amount)
 	if !ok {
-		return sdkerrors.Wrapf(types.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount)
+		return sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount)
 	}
 
 	labels := []metrics.Label{
@@ -246,11 +247,11 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 
 	var ibcCoin sdk.Coin
 	var receiveCoin sdk.Coin
-	if types.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {
+	if transfertypes.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {
 		// sender chain is not the source, unescrow tokens
 
 		// remove prefix added by sender chain
-		voucherPrefix := types.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
+		voucherPrefix := transfertypes.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
 		unprefixedDenom := data.Denom[len(voucherPrefix):]
 
 		// coin denomination used in sending from the escrow address
@@ -258,7 +259,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 
 		// The denomination used to send the coins is either the native denom or the hash of the path
 		// if the denomination is not native.
-		denomTrace := types.ParseDenomTrace(unprefixedDenom)
+		denomTrace := transfertypes.ParseDenomTrace(unprefixedDenom)
 		if denomTrace.Path != "" {
 			denom = denomTrace.IBCDenom()
 		}
@@ -274,7 +275,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		token = token.Add(sdk.NewCoin(token.Denom, feeAmount))
 		receiveCoin = token
 		// unescrow tokens
-		escrowAddress := types.GetEscrowAddress(packet.GetDestPort(), packet.GetDestChannel())
+		escrowAddress := transfertypes.GetEscrowAddress(packet.GetDestPort(), packet.GetDestChannel())
 		if err := k.bankKeeper.SendCoins(ctx, escrowAddress, receiver, sdk.NewCoins(token)); err != nil {
 			// NOTE: this error is only expected to occur given an unexpected bug or a malicious
 			// counterparty module. The bug may occur in bank or any part of the code that allows
@@ -286,7 +287,7 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		defer func() {
 
 			telemetry.IncrCounterWithLabels(
-				[]string{"ibc", types.ModuleName, "receive"},
+				[]string{"ibc", transfertypes.ModuleName, "receive"},
 				1,
 				append(
 					labels, telemetry.NewLabel(coretypes.LabelSource, "true"),
@@ -297,12 +298,12 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		// sender chain is the source, mint vouchers
 
 		// since SendPacket did not prefix the denomination, we must prefix denomination here
-		sourcePrefix := types.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+		sourcePrefix := transfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
 		// NOTE: sourcePrefix contains the trailing "/"
 		prefixedDenom := sourcePrefix + data.Denom
 
 		// construct the denomination trace from the full raw denomination
-		denomTrace := types.ParseDenomTrace(prefixedDenom)
+		denomTrace := transfertypes.ParseDenomTrace(prefixedDenom)
 
 		traceHash := denomTrace.Hash()
 		if !k.HasDenomTrace(ctx, traceHash) {
@@ -312,9 +313,9 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		voucherDenom := denomTrace.IBCDenom()
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				types.EventTypeDenomTrace,
-				sdk.NewAttribute(types.AttributeKeyTraceHash, traceHash.String()),
-				sdk.NewAttribute(types.AttributeKeyDenom, voucherDenom),
+				transfertypes.EventTypeDenomTrace,
+				sdk.NewAttribute(transfertypes.AttributeKeyTraceHash, traceHash.String()),
+				sdk.NewAttribute(transfertypes.AttributeKeyDenom, voucherDenom),
 			),
 		)
 
@@ -326,21 +327,21 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 		receiveCoin = voucher
 		// mint new tokens if the source of the transfer is the same chain
 		if err := k.bankKeeper.MintCoins(
-			ctx, types.ModuleName, sdk.NewCoins(voucher),
+			ctx, transfertypes.ModuleName, sdk.NewCoins(voucher),
 		); err != nil {
 			return err
 		}
 
 		// send to receiver
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(
-			ctx, types.ModuleName, receiver, sdk.NewCoins(voucher),
+			ctx, transfertypes.ModuleName, receiver, sdk.NewCoins(voucher),
 		); err != nil {
 			return err
 		}
 
 		defer func() {
 			telemetry.IncrCounterWithLabels(
-				[]string{"ibc", types.ModuleName, "receive"},
+				[]string{"ibc", transfertypes.ModuleName, "receive"},
 				1,
 				append(
 					labels, telemetry.NewLabel(coretypes.LabelSource, "false"),
@@ -352,8 +353,8 @@ func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data t
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeReceive,
-			sdk.NewAttribute(types.AttributeKeyReceiver, receiver.String()),
-			sdk.NewAttribute(types.AttributeKeyAmount, receiveCoin.String()),
+			sdk.NewAttribute(transfertypes.AttributeKeyReceiver, receiver.String()),
+			sdk.NewAttribute(transfertypes.AttributeKeyAmount, receiveCoin.String()),
 		),
 	)
 
@@ -419,17 +420,17 @@ func (k Keeper) refundPacketToken(ctx sdk.Context, packet channeltypes.Packet, d
 	// NOTE: packet data type already checked in handler.go
 
 	// parse the denomination from the full denom path
-	trace := types.ParseDenomTrace(data.Denom)
+	trace := transfertypes.ParseDenomTrace(data.Denom)
 
 	amount, ok := sdk.NewIntFromString(data.Amount)
 	if !ok {
-		return sdkerrors.Wrapf(types.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount)
+		return sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount)
 	}
 	// If the IBC router is not empty, the feeAmount refund is added.
 	if data.Router != "" {
 		feeAmount, ok := sdk.NewIntFromString(data.Fee)
 		if !ok {
-			return sdkerrors.Wrapf(types.ErrInvalidAmount, "unable to parse transfer fee (%s) into sdk.Int", data.Amount)
+			return sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse transfer fee (%s) into sdk.Int", data.Amount)
 		}
 		amount = amount.Add(feeAmount)
 	}
@@ -441,9 +442,9 @@ func (k Keeper) refundPacketToken(ctx sdk.Context, packet channeltypes.Packet, d
 		return err
 	}
 
-	if types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {
+	if transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {
 		// unescrow tokens back to sender
-		escrowAddress := types.GetEscrowAddress(packet.GetSourcePort(), packet.GetSourceChannel())
+		escrowAddress := transfertypes.GetEscrowAddress(packet.GetSourcePort(), packet.GetSourceChannel())
 		if err = k.bankKeeper.SendCoins(ctx, escrowAddress, sender, sdk.NewCoins(token)); err != nil {
 			// NOTE: this error is only expected to occur given an unexpected bug or a malicious
 			// counterparty module. The bug may occur in bank or any part of the code that allows
@@ -454,12 +455,12 @@ func (k Keeper) refundPacketToken(ctx sdk.Context, packet channeltypes.Packet, d
 	} else {
 		// mint vouchers back to sender
 		if err = k.bankKeeper.MintCoins(
-			ctx, types.ModuleName, sdk.NewCoins(token),
+			ctx, transfertypes.ModuleName, sdk.NewCoins(token),
 		); err != nil {
 			return err
 		}
 
-		if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sender, sdk.NewCoins(token)); err != nil {
+		if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, transfertypes.ModuleName, sender, sdk.NewCoins(token)); err != nil {
 			panic(fmt.Sprintf("unable to send coins from module to account despite previously minting coins to module account: %v", err))
 		}
 	}
@@ -474,22 +475,22 @@ func (k Keeper) refundPacketToken(ctx sdk.Context, packet channeltypes.Packet, d
 	return nil
 }
 
-// DenomPathFromHash returns the full denomination path prefix from an ibc denom with a hash
-// component.
-func (k Keeper) DenomPathFromHash(ctx sdk.Context, denom string) (string, error) {
-	// trim the denomination prefix, by default "ibc/"
-	hexHash := denom[len(types.DenomPrefix+"/"):]
-
-	hash, err := types.ParseHexHash(hexHash)
-	if err != nil {
-		return "", sdkerrors.Wrap(types.ErrInvalidDenomForTransfer, err.Error())
-	}
-
-	denomTrace, found := k.GetDenomTrace(ctx, hash)
-	if !found {
-		return "", sdkerrors.Wrap(types.ErrTraceNotFound, hexHash)
-	}
-
-	fullDenomPath := denomTrace.GetFullDenomPath()
-	return fullDenomPath, nil
-}
+//// DenomPathFromHash returns the full denomination path prefix from an ibc denom with a hash
+//// component.
+//func (k Keeper) DenomPathFromHash(ctx sdk.Context, denom string) (string, error) {
+//	// trim the denomination prefix, by default "ibc/"
+//	hexHash := denom[len(transfertypes.DenomPrefix+"/"):]
+//
+//	hash, err := transfertypes.ParseHexHash(hexHash)
+//	if err != nil {
+//		return "", sdkerrors.Wrap(transfertypes.ErrInvalidDenomForTransfer, err.Error())
+//	}
+//
+//	denomTrace, found := k.GetDenomTrace(ctx, hash)
+//	if !found {
+//		return "", sdkerrors.Wrap(transfertypes.ErrTraceNotFound, hexHash)
+//	}
+//
+//	fullDenomPath := denomTrace.GetFullDenomPath()
+//	return fullDenomPath, nil
+//}

@@ -16,7 +16,7 @@ import (
 	commitmenttypes "github.com/cosmos/ibc-go/v3/modules/core/23-commitment/types"
 	ibctmtypes "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/functionx/fx-core/v2/x/ibc/testing/mock"
 )
@@ -36,7 +36,7 @@ const (
 	InvalidID             = "IDisInvalid"
 
 	// Application Ports
-	TransferPort = ibctransfertypes.ModuleName
+	TransferPort = transfertypes.ModuleName
 	MockPort     = mock.ModuleName
 
 	// used for testing proposals

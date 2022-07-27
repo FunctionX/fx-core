@@ -152,7 +152,7 @@ func (k Keeper) TransferIBCHandler(ctx sdk.Context, from sdk.AccAddress, to stri
 		return fmt.Errorf("ibc channel next sequence send not found, port %s, channel %s", targetIBC.SourcePort, targetIBC.SourceChannel)
 	}
 	logger.Info("ibc transfer", "port", targetIBC.SourcePort, "channel", targetIBC.SourceChannel, "sequence", nextSequenceSend, "timeout-height", ibcTimeoutHeight)
-	if err := k.ibcTransferKeeper.SendTransfer(
+	if err := k.ibcTransferKeeper.SendFxTransfer(
 		ctx, targetIBC.SourcePort, targetIBC.SourceChannel, amount, from.Bytes(),
 		to, ibcTimeoutHeight, ibcTimeoutTimestamp, "", fee); err != nil {
 		return err

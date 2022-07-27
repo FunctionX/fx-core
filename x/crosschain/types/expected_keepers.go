@@ -5,11 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	"github.com/cosmos/ibc-go/v3/modules/core/exported"
 	"github.com/ethereum/go-ethereum/common"
-
-	tranfsertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 type StakingKeeper interface {
@@ -61,5 +60,5 @@ type IBCTransferKeeper interface {
 		router string,
 		fee sdk.Coin,
 	) error
-	SetDenomTrace(ctx sdk.Context, denomTrace tranfsertypes.DenomTrace)
+	SetDenomTrace(ctx sdk.Context, denomTrace transfertypes.DenomTrace)
 }

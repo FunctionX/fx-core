@@ -3,8 +3,6 @@ package fx.ibc.applications.transfer.v1;
 
 option go_package = "github.com/functionx/fx-core/x/ibc/applications/transfer/types";
 
-import "gogoproto/gogo.proto";
-
 // FungibleTokenPacketData defines a struct for the packet payload
 // See FungibleTokenPacketData spec:
 // https://github.com/cosmos/ics/tree/master/spec/ics-020-fungible-token-transfer#data-structures

@@ -68,7 +68,7 @@ func (a AttestationHandler) handleIbcTransfer(ctx sdk.Context, claim *types.MsgD
 		return
 	}
 	logger.Info("gravity start ibc transfer", "sender", receiveAddr, "receive", ibcReceiveAddress, "coin", coin, "destCurrentHeight", clientStateHeight.GetRevisionHeight(), "destTimeoutHeight", destTimeoutHeight, "nextSequenceSend", nextSequenceSend)
-	if err = a.keeper.ibcTransferKeeper.SendTransfer(ctx,
+	if err = a.keeper.ibcTransferKeeper.SendFxTransfer(ctx,
 		targetIBC.SourcePort, targetIBC.SourceChannel,
 		coin, receiveAddr, ibcReceiveAddress,
 		ibcTimeoutHeight, 0,

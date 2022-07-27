@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -40,8 +41,8 @@ func NewTransferPath(chainA, chainB *ibctesting.TestChain) *ibctesting.Path {
 	path := ibctesting.NewPath(chainA, chainB)
 	path.EndpointA.ChannelConfig.PortID = ibctesting.TransferPort
 	path.EndpointB.ChannelConfig.PortID = ibctesting.TransferPort
-	path.EndpointA.ChannelConfig.Version = types.Version
-	path.EndpointB.ChannelConfig.Version = types.Version
+	path.EndpointA.ChannelConfig.Version = transfertypes.Version
+	path.EndpointB.ChannelConfig.Version = transfertypes.Version
 
 	return path
 }

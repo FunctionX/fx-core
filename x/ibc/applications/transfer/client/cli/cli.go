@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	transfercli "github.com/cosmos/ibc-go/v3/modules/apps/transfer/client/cli"
 )
 
 // GetQueryCmd returns the query commands for IBC connections
@@ -16,12 +17,12 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	queryCmd.AddCommand(
-		GetCmdQueryDenomTrace(),
-		GetCmdQueryDenomTraces(),
-		GetCmdParams(),
+		transfercli.GetCmdQueryDenomTrace(),
+		transfercli.GetCmdQueryDenomTraces(),
+		transfercli.GetCmdParams(),
 		GetCmdDenomToIBcDenom(),
-		GetCmdQueryEscrowAddress(),
-		GetCmdQueryDenomHash(),
+		transfercli.GetCmdQueryEscrowAddress(),
+		transfercli.GetCmdQueryDenomHash(),
 	)
 
 	return queryCmd
