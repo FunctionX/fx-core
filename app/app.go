@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
+	ibctransfer "github.com/cosmos/ibc-go/v3/modules/apps/transfer"
+	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+
 	"github.com/cosmos/cosmos-sdk/x/gov"
 
 	erc20keeper "github.com/functionx/fx-core/v2/x/erc20/keeper"
@@ -123,9 +126,11 @@ import (
 
 	"github.com/functionx/fx-core/v2/x/crosschain"
 	crosschaintypes "github.com/functionx/fx-core/v2/x/crosschain/types"
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
-	ibctransferkeeper "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/keeper"
-	ibctransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
+	fxtransfer "github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
+	fxtransferkeeper "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/keeper"
+	fxtransfertypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
+
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
 
 	"github.com/functionx/fx-core/v2/x/gravity"
 	gravitykeeper "github.com/functionx/fx-core/v2/x/gravity/keeper"
@@ -207,7 +212,8 @@ var (
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		transfer.AppModuleBasic{},
+		fxtransfer.AppModuleBasic{},
+		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 		other.AppModuleBasic{}, //nolint
@@ -277,11 +283,12 @@ type App struct {
 	ParamsKeeper     paramskeeper.Keeper
 
 	// IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	IBCKeeper      *ibckeeper.Keeper
-	EvidenceKeeper evidencekeeper.Keeper
-	TransferKeeper ibctransferkeeper.Keeper
-	FeeGrantKeeper feegrantkeeper.Keeper
-	AuthzKeeper    authzkeeper.Keeper
+	IBCKeeper         *ibckeeper.Keeper
+	EvidenceKeeper    evidencekeeper.Keeper
+	TransferKeeper    fxtransferkeeper.Keeper
+	IBCTransferKeeper ibctransferkeeper.Keeper
+	FeeGrantKeeper    feegrantkeeper.Keeper
+	AuthzKeeper       authzkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -417,7 +424,11 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 		appCodec, keys[ibchost.StoreKey], myApp.GetSubspace(ibchost.ModuleName), stakingKeeper, myApp.UpgradeKeeper, scopedIBCKeeper,
 	)
 
-	myApp.TransferKeeper = ibctransferkeeper.NewKeeper(
+	myApp.IBCTransferKeeper = ibctransferkeeper.NewKeeper(appCodec, keys[ibctransfertypes.StoreKey], myApp.GetSubspace(ibctransfertypes.ModuleName),
+		myApp.IBCKeeper.ChannelKeeper, myApp.IBCKeeper.ChannelKeeper, &myApp.IBCKeeper.PortKeeper,
+		myApp.AccountKeeper, myApp.BankKeeper, scopedTransferKeeper)
+
+	myApp.TransferKeeper = fxtransferkeeper.NewKeeper(myApp.IBCTransferKeeper,
 		appCodec, keys[ibctransfertypes.StoreKey], myApp.GetSubspace(ibctransfertypes.ModuleName),
 		myApp.IBCKeeper.ChannelKeeper, myApp.IBCKeeper.ChannelKeeper, &myApp.IBCKeeper.PortKeeper,
 		myApp.AccountKeeper, myApp.BankKeeper, scopedTransferKeeper,
@@ -506,7 +517,7 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 	erc20TransferRouter.AddRoute(trontypes.ModuleName, myApp.TronKeeper)
 	myApp.Erc20Keeper.SetRouter(erc20TransferRouter)
 
-	ibcTransferRouter := ibctransfertypes.NewRouter()
+	ibcTransferRouter := fxtransfertypes.NewRouter()
 	ibcTransferRouter.AddRoute(gravitytypes.ModuleName, myApp.GravityKeeper)
 	ibcTransferRouter.AddRoute(bsctypes.ModuleName, myApp.BscKeeper)
 	ibcTransferRouter.AddRoute(polygontypes.ModuleName, myApp.PolygonKeeper)
@@ -514,8 +525,10 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 	ibcTransferRouter.AddRoute(erc20types.ModuleName, myApp.Erc20Keeper)
 	myApp.TransferKeeper.SetRouter(ibcTransferRouter)
 	myApp.TransferKeeper.SetRefundHook(myApp.Erc20Keeper)
-	transferModule := transfer.NewAppModule(myApp.TransferKeeper)
-	transferIBCModule := transfer.NewIBCModule(myApp.TransferKeeper)
+
+	fxTransferModule := fxtransfer.NewAppModule(myApp.TransferKeeper)
+	ibcTransferModule := ibctransfer.NewIBCModule(myApp.IBCTransferKeeper)
+	transferIBCModule := fxtransfer.NewIBCMiddleware(myApp.TransferKeeper, ibcTransferModule)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
@@ -576,7 +589,8 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 		FeeMarketAppModule{feemarket.NewAppModule(myApp.FeeMarketKeeper)},
 		erc20.NewAppModule(myApp.Erc20Keeper, myApp.AccountKeeper),
 		migrate.NewAppModule(myApp.MigrateKeeper),
-		transferModule,
+		fxTransferModule,
+		ibctransfer.NewAppModule(myApp.IBCTransferKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -594,6 +608,7 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		//liquiditytypes.ModuleName,
+		fxtransfertypes.CompatibleModuleName,
 		ibctransfertypes.ModuleName,
 		ibchost.ModuleName,
 		//icatypes.ModuleName,
@@ -628,6 +643,7 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 		evmtypes.ModuleName,
 		feemarkettypes.ModuleName,
 		//liquiditytypes.ModuleName,
+		fxtransfertypes.CompatibleModuleName,
 		ibctransfertypes.ModuleName,
 		ibchost.ModuleName,
 		//icatypes.ModuleName,
@@ -672,6 +688,7 @@ func New(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, sk
 		govtypes.ModuleName,
 		minttypes.ModuleName,
 		crisistypes.ModuleName,
+		fxtransfertypes.CompatibleModuleName,
 		ibctransfertypes.ModuleName,
 		ibchost.ModuleName,
 		//icatypes.ModuleName,

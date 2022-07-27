@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
+	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
 	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -18,11 +20,12 @@ import (
 
 // Keeper defines the IBC fungible transfer keeper
 type Keeper struct {
+	ibctransferkeeper.Keeper
 	storeKey   sdk.StoreKey
 	cdc        codec.BinaryCodec
 	paramSpace paramtypes.Subspace
 
-	ics4Wrapper   types.ICS4Wrapper
+	ics4Wrapper   porttypes.ICS4Wrapper
 	channelKeeper types.ChannelKeeper
 	portKeeper    types.PortKeeper
 	authKeeper    types.AccountKeeper
@@ -33,15 +36,15 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new IBC transfer Keeper instance
-func NewKeeper(
+func NewKeeper(keeper ibctransferkeeper.Keeper,
 	cdc codec.BinaryCodec, key sdk.StoreKey, paramSpace paramtypes.Subspace,
-	ics4Wrapper types.ICS4Wrapper, channelKeeper types.ChannelKeeper, portKeeper types.PortKeeper,
+	ics4Wrapper porttypes.ICS4Wrapper, channelKeeper types.ChannelKeeper, portKeeper types.PortKeeper,
 	authKeeper types.AccountKeeper, bankKeeper types.BankKeeper, scopedKeeper capabilitykeeper.ScopedKeeper,
 ) Keeper {
 
 	// ensure ibc transfer module account is set
 	if addr := authKeeper.GetModuleAddress(types.ModuleName); addr == nil {
-		panic("the IBC transfer module account has not been set")
+		panic("the FX IBC transfer module account has not been set")
 	}
 
 	// set KeyTable if it has not already been set
@@ -50,6 +53,7 @@ func NewKeeper(
 	}
 
 	return Keeper{
+		Keeper:        keeper,
 		cdc:           cdc,
 		storeKey:      key,
 		paramSpace:    paramSpace,

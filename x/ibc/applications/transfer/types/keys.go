@@ -11,6 +11,9 @@ const (
 	// ModuleName defines the IBC transfer name
 	ModuleName = "transfer"
 
+	//CompatibleModuleName is the query and tx module name
+	CompatibleModuleName = "fxtransfer"
+
 	// Version defines the current version the IBC tranfer
 	// module supports
 	Version = "ics20-1"
@@ -19,13 +22,13 @@ const (
 	PortID = "transfer"
 
 	// StoreKey is the store key string for IBC transfer
-	StoreKey = ModuleName
+	StoreKey = "transfer"
 
 	// RouterKey is the message route for IBC transfer
-	RouterKey = ModuleName
+	RouterKey = CompatibleModuleName
 
 	// QuerierRoute is the querier route for IBC transfer
-	QuerierRoute = ModuleName
+	QuerierRoute = CompatibleModuleName
 
 	// DenomPrefix is the prefix used for internal SDK coin representation.
 	DenomPrefix = "ibc"

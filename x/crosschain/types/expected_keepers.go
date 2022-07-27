@@ -49,7 +49,7 @@ type IBCChannelKeeper interface {
 }
 
 type IBCTransferKeeper interface {
-	SendTransfer(
+	SendFxTransfer(
 		ctx sdk.Context,
 		sourcePort,
 		sourceChannel string,

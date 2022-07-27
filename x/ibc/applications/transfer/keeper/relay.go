@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	"github.com/cosmos/ibc-go/v3/modules/core/exported"
+
 	coretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
 
 	"github.com/cosmos/cosmos-sdk/types/bech32"
@@ -19,6 +22,10 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 )
+
+func (k Keeper) SendTransfer(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI) error {
+	return k.ics4Wrapper.SendPacket(ctx, chanCap, packet)
+}
 
 // SendTransfer handles transfer sending logic. There are 2 possible cases:
 //
@@ -52,7 +59,7 @@ import (
 // 4. A -> C : sender chain is sink zone. Denom upon receiving: 'C/B/denom'
 // 5. C -> B : sender chain is sink zone. Denom upon receiving: 'B/denom'
 // 6. B -> A : sender chain is sink zone. Denom upon receiving: 'denom'
-func (k Keeper) SendTransfer(
+func (k Keeper) SendFxTransfer(
 	ctx sdk.Context,
 	sourcePort,
 	sourceChannel string,
