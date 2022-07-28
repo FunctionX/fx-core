@@ -108,7 +108,7 @@ Example:
 	cmd.Flags().String(flagNodeNamePrefix, "node", "Prefix the directory name for each node with (node results in node0, node1, ...)")
 	cmd.Flags().String(flagNodeDaemonHome, fxtypes.Name, "Home directory of the node's daemon configuration")
 	cmd.Flags().String(flagStartingIP, "172.20.0.2", "Starting IP address (192.168.0.1 results in persistent peers list ID0@192.168.0.1:46656, ID1@192.168.0.2:46656, ...)")
-	cmd.Flags().String(flags.FlagChainID, fxtypes.ChainID, "genesis file chain-id, if left blank will be randomly created")
+	cmd.Flags().String(flags.FlagChainID, "fxcore", "genesis file chain-id, if left blank will be randomly created")
 	cmd.Flags().String(server.FlagMinGasPrices, fmt.Sprintf("4000000000000%s", fxtypes.DefaultDenom), "Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum")
 	cmd.Flags().String(flags.FlagKeyAlgorithm, secp256k1.KeyType, "Key signing algorithm to generate keys for")
 	cmd.Flags().String(cli.FlagDenom, fxtypes.DefaultDenom, "set the default coin denomination")

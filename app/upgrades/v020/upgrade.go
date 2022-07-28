@@ -196,7 +196,7 @@ func migrationsOrder(modules []string) []string {
 }
 
 func clearTestnetDenom(ctx sdk.Context, keys map[string]*types.KVStoreKey) {
-	if fxtypes.TestnetChainId() != fxtypes.ChainId() {
+	if fxtypes.TestnetChainId != fxtypes.ChainId() {
 		return
 	}
 	key, ok := keys[banktypes.StoreKey]
@@ -218,7 +218,7 @@ func clearTestnetDenom(ctx sdk.Context, keys map[string]*types.KVStoreKey) {
 
 func clearTestnetModule(ctx sdk.Context, keys map[string]*types.KVStoreKey) {
 	logger := ctx.Logger()
-	if fxtypes.TestnetChainId() != fxtypes.ChainId() {
+	if fxtypes.TestnetChainId != fxtypes.ChainId() {
 		return
 	}
 	logger.Info("clear kv store", "chainId", fxtypes.ChainId())

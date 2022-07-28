@@ -98,7 +98,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringSlice(appCmd.FlagLogFilter, []string{}, `The logging filter can discard custom log type (ABCIQuery)`)
 	initRootCmd(rootCmd, encodingConfig)
 	overwriteFlagDefaults(rootCmd, map[string]string{
-		flags.FlagChainID:        fxtypes.ChainID,
+		flags.FlagChainID:        fxtypes.ChainId(),
 		flags.FlagKeyringBackend: keyring.BackendOS,
 		flags.FlagGas:            "80000",
 	})

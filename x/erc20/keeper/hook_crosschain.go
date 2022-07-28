@@ -105,7 +105,7 @@ func (k Keeper) TransferChainHandler(ctx sdk.Context, from sdk.AccAddress, to st
 }
 
 func (k Keeper) testnetConvertDenomBetweenBlock(ctx sdk.Context, from sdk.AccAddress, coin sdk.Coin, target string) (sdk.Coin, error) {
-	isTestnet := fxtypes.ChainId() == fxtypes.TestnetChainId()
+	isTestnet := fxtypes.ChainId() == fxtypes.TestnetChainId
 	afterManyToOneBlock := ctx.BlockHeight() >= fxtypes.SupportDenomManyToOneBlock()
 	beforeOneToManyBlock := ctx.BlockHeight() < fxtypes.SupportDenomOneToManyBlock()
 

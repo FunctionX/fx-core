@@ -18,7 +18,7 @@ const (
 		mainnetGravityValsetSlashBlock = 1685000
 	*/
 
-	mainnetChainId    = "fxcore"
+	MainnetChainId    = "fxcore"
 	mainnetEvmChainID = 530
 
 	mainnetSupportDenomManyToOneBlock = 5940000
@@ -26,7 +26,7 @@ const (
 
 // testnet constant
 const (
-	testnetChainId        = "dhobyghaut"
+	TestnetChainId        = "dhobyghaut"
 	testnetEvmChainID     = 90001
 	testnetIBCRouterBlock = 3433511
 
@@ -44,12 +44,12 @@ func SupportDenomManyToOneMsgTypes() []string {
 }
 
 var (
-	chainId = mainnetChainId
+	chainId = MainnetChainId
 	once    sync.Once
 )
 
 func SetChainId(id string) {
-	if id != mainnetChainId && id != testnetChainId {
+	if id != MainnetChainId && id != TestnetChainId {
 		panic("invalid chainId: " + id)
 	}
 	once.Do(func() {
@@ -61,22 +61,15 @@ func ChainId() string {
 	return chainId
 }
 
-func NetworkMainnet() string {
-	return mainnetChainId
-}
-func TestnetChainId() string {
-	return testnetChainId
-}
-
 func EIP155ChainID() *big.Int {
-	if testnetChainId == chainId {
+	if TestnetChainId == chainId {
 		return big.NewInt(testnetEvmChainID)
 	}
 	return big.NewInt(mainnetEvmChainID)
 }
 
 func IBCRouteBlock() int64 {
-	if testnetChainId == chainId {
+	if TestnetChainId == chainId {
 		return testnetIBCRouterBlock
 	}
 	return 0
@@ -95,7 +88,7 @@ func SupportDenomManyToOneBlock() int64 {
 	if os.Getenv("GO_ENV") == "testing" {
 		return testingManyToOneBlock()
 	}
-	if testnetChainId == chainId {
+	if TestnetChainId == chainId {
 		return testnetSupportDenomManyToOneBlock
 	}
 	return mainnetSupportDenomManyToOneBlock
@@ -114,7 +107,7 @@ func SupportDenomOneToManyBlock() int64 {
 	if os.Getenv("GO_ENV") == "testing" {
 		return testingSupportDenomOneToManyBlock()
 	}
-	if testnetChainId == chainId {
+	if TestnetChainId == chainId {
 		return testnetSupportDenomOneToManyBlock
 	}
 	return mainnetSupportDenomManyToOneBlock

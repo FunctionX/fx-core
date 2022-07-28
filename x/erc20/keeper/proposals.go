@@ -245,7 +245,7 @@ func (k Keeper) UpdateDenomAlias(ctx sdk.Context, denom, alias string) (bool, er
 	//check if the alias not register denom-alias
 	if len(aliasDenomRegistered) == 0 {
 		//fix testnet new aliases
-		if fxtypes.ChainId() == fxtypes.TestnetChainId() && ctx.BlockHeight() < fxtypes.SupportDenomOneToManyBlock() {
+		if fxtypes.ChainId() == fxtypes.TestnetChainId && ctx.BlockHeight() < fxtypes.SupportDenomOneToManyBlock() {
 			newAliases = append(newAliases, alias)
 		} else {
 			newAliases = append(oldAliases, alias)

@@ -63,7 +63,7 @@ func DefaultNetworkConfig() network.Config {
 		},
 		GenesisState:    DefNoSupplyGenesisState(encCfg.Marshaler),
 		TimeoutCommit:   1 * time.Second,
-		ChainID:         fxtypes.ChainID,
+		ChainID:         fxtypes.MainnetChainId,
 		NumValidators:   4,
 		BondDenom:       fxtypes.DefaultDenom,
 		MinGasPrices:    fmt.Sprintf("4000000000000%s", fxtypes.DefaultDenom),

@@ -278,7 +278,7 @@ func (suite *IntegrationTestSuite) TestClient_Query() {
 		{
 			funcName: "GetChainId",
 			params:   []interface{}{},
-			wantRes:  []interface{}{fxtypes.ChainID, nil},
+			wantRes:  []interface{}{fxtypes.MainnetChainId, nil},
 		},
 		{
 			funcName: "GetMintDenom",

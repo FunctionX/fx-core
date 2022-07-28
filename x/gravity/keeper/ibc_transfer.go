@@ -26,7 +26,7 @@ func (a AttestationHandler) handlerRelayTransfer(ctx sdk.Context, claim *types.M
 	// 2. before block + isTestnet + target empty + denom != FX
 	evmTarget := claim.TargetIbc == targetEvmPrefix
 	beforeBlock := ctx.BlockHeight() < fxtypes.SupportDenomManyToOneBlock()
-	isTestnet := fxtypes.ChainId() == fxtypes.TestnetChainId()
+	isTestnet := fxtypes.ChainId() == fxtypes.TestnetChainId
 	emptyTarget := claim.TargetIbc == ""
 	notDefaultDenom := coin.Denom != fxtypes.DefaultDenom
 	if evmTarget || (beforeBlock && isTestnet && emptyTarget && notDefaultDenom) {

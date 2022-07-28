@@ -698,7 +698,7 @@ func (k Keeper) SupportRefundGasWithGasMeter(ctx sdk.Context, gasMater sdk.GasMe
 }
 
 func targetToDenomPrefix(ctx sdk.Context, target string) (prefix string) {
-	if fxtypes.ChainId() == fxtypes.TestnetChainId() && ctx.BlockHeight() < fxtypes.SupportDenomOneToManyBlock() {
+	if fxtypes.ChainId() == fxtypes.TestnetChainId && ctx.BlockHeight() < fxtypes.SupportDenomOneToManyBlock() {
 		return target
 	}
 	if target == gravitytypes.ModuleName {
