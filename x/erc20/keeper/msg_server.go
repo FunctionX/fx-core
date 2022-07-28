@@ -44,15 +44,20 @@ func (k Keeper) ConvertCoin(goCtx context.Context, msg *types.MsgConvertCoin) (*
 		return nil, nil
 	}
 
+	var res *types.MsgConvertCoinResponse
+	var gasMeter sdk.GasMeter
+	ctx, gasMeter = k.SupportInfiniteGasMeter(ctx)
 	// Check ownership and execute conversion
 	switch {
 	case pair.IsNativeCoin():
-		return k.convertCoinNativeCoin(ctx, pair, msg, receiver, sender) // case 1.1
+		res, err = k.convertCoinNativeCoin(ctx, pair, msg, receiver, sender) // case 1.1
 	case pair.IsNativeERC20():
-		return k.convertCoinNativeERC20(ctx, pair, msg, receiver, sender) // case 2.2
+		res, err = k.convertCoinNativeERC20(ctx, pair, msg, receiver, sender) // case 2.2
 	default:
-		return nil, types.ErrUndefinedOwner
+		err = types.ErrUndefinedOwner
 	}
+	ctx = k.SupportRefundGasWithGasMeter(ctx, gasMeter) //nolint
+	return res, err
 }
 
 // ConvertERC20 converts ERC20 tokens into Cosmos-native Coins for both
@@ -93,15 +98,20 @@ func (k Keeper) ConvertERC20(goCtx context.Context, msg *types.MsgConvertERC20) 
 		return nil, nil
 	}
 
+	var res *types.MsgConvertERC20Response
+	var gasMeter sdk.GasMeter
+	ctx, gasMeter = k.SupportInfiniteGasMeter(ctx)
 	// Check ownership
 	switch {
 	case pair.IsNativeCoin():
-		return k.convertERC20NativeCoin(ctx, pair, msg, receiver, sender) // case 1.2
+		res, err = k.convertERC20NativeCoin(ctx, pair, msg, receiver, sender) // case 1.2
 	case pair.IsNativeERC20():
-		return k.convertERC20NativeToken(ctx, pair, msg, receiver, sender) // case 2.1
+		res, err = k.convertERC20NativeToken(ctx, pair, msg, receiver, sender) // case 2.1
 	default:
-		return nil, types.ErrUndefinedOwner
+		err = types.ErrUndefinedOwner
 	}
+	ctx = k.SupportRefundGasWithGasMeter(ctx, gasMeter) //nolint
+	return res, err
 }
 
 // ConvertDenom converts coin into other coin, use for multiple chains in the same currency
@@ -670,6 +680,21 @@ func (k Keeper) sendCoins(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Co
 	}
 
 	return k.bankKeeper.SendCoins(ctx, from, to, coins)
+}
+
+func (k Keeper) SupportInfiniteGasMeter(ctx sdk.Context) (sdk.Context, sdk.GasMeter) {
+	gasMeter := ctx.GasMeter()
+	if ctx.BlockHeight() >= fxtypes.SupportDenomOneToManyBlock() {
+		ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	}
+	return ctx, gasMeter
+}
+
+func (k Keeper) SupportRefundGasWithGasMeter(ctx sdk.Context, gasMater sdk.GasMeter) sdk.Context {
+	if ctx.BlockHeight() >= fxtypes.SupportDenomOneToManyBlock() {
+		ctx = ctx.WithGasMeter(gasMater)
+	}
+	return ctx
 }
 
 func targetToDenomPrefix(ctx sdk.Context, target string) (prefix string) {
