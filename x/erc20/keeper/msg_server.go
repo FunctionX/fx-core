@@ -41,7 +41,7 @@ func (k Keeper) ConvertCoin(goCtx context.Context, msg *types.MsgConvertCoin) (*
 		k.DeleteTokenPair(ctx, pair)
 		k.Logger(ctx).Debug("deleting selfdestructed token pair from state", "contract", pair.Erc20Address)
 		// NOTE: return nil error to persist the changes from the deletion
-		return nil, nil
+		return &types.MsgConvertCoinResponse{}, nil
 	}
 
 	var res *types.MsgConvertCoinResponse
@@ -95,7 +95,7 @@ func (k Keeper) ConvertERC20(goCtx context.Context, msg *types.MsgConvertERC20) 
 		k.DeleteTokenPair(ctx, pair)
 		k.Logger(ctx).Debug("deleting selfdestructed token pair from state", "contract", pair.Erc20Address)
 		// NOTE: return nil error to persist the changes from the deletion
-		return nil, nil
+		return &types.MsgConvertERC20Response{}, nil
 	}
 
 	var res *types.MsgConvertERC20Response
