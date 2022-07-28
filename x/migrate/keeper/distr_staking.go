@@ -58,6 +58,7 @@ func (m *DistrStakingMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAdd
 	//	distrStore.Delete(distrtypes.GetDelegatorWithdrawAddrKey(from))
 	//	distrStore.Set(distrtypes.GetDelegatorWithdrawAddrKey(to), bz)
 	//}
+	events := make([]sdk.Event, 0, 10)
 
 	//migrate delegate info
 	delegateIterator := sdk.KVStorePrefixIterator(stakingStore, stakingtypes.GetDelegationsKey(from))
@@ -75,6 +76,13 @@ func (m *DistrStakingMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAdd
 		info.DelegatorAddress = sdk.AccAddress(to.Bytes()).String()
 		stakingStore.Delete(delegateIterator.Key())
 		stakingStore.Set(stakingtypes.GetDelegationKey(to.Bytes(), info.GetValidatorAddr()), stakingtypes.MustMarshalDelegation(k.cdc, info))
+
+		events = append(events,
+			sdk.NewEvent(
+				types.EventTypeMigrateStakingDelegate,
+				sdk.NewAttribute(types.AttributeKeyValidatorAddr, info.GetValidatorAddr().String()),
+			),
+		)
 	}
 
 	//migrate unbonding delegation
@@ -110,6 +118,13 @@ func (m *DistrStakingMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAdd
 				stakingStore.Set(key, value)
 			}
 		}
+
+		events = append(events,
+			sdk.NewEvent(
+				types.EventTypeMigrateStakingUndelegate,
+				sdk.NewAttribute(types.AttributeKeyValidatorAddr, valAddr.String()),
+			),
+		)
 	}
 
 	//migrate redelegate
@@ -153,6 +168,18 @@ func (m *DistrStakingMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAdd
 				stakingStore.Set(key, value)
 			}
 		}
+
+		events = append(events,
+			sdk.NewEvent(
+				types.EventTypeMigrateStakingRedelegate,
+				sdk.NewAttribute(types.AttributeKeyValidatorSrcAddr, valSrcAddr.String()),
+				sdk.NewAttribute(types.AttributeKeyValidatorDstAddr, valDstAddr.String()),
+			),
+		)
+	}
+
+	if len(events) > 0 {
+		ctx.EventManager().EmitEvents(events)
 	}
 	return nil
 }

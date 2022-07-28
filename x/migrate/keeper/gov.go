@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -39,6 +41,7 @@ func (m *GovMigrate) Validate(ctx sdk.Context, _ Keeper, from sdk.AccAddress, to
 
 func (m *GovMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAddress, to common.Address) error {
 	govStore := ctx.KVStore(m.govKey)
+	events := make([]sdk.Event, 0, 10)
 
 	depositParams := m.govKeeper.GetDepositParams(ctx)
 	inactiveIter := m.govKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockTime().Add(depositParams.MaxDepositPeriod))
@@ -52,6 +55,15 @@ func (m *GovMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAddress, to 
 			if toFound {
 				amount = amount.Add(toDeposit.Amount...)
 			}
+
+			events = append(events,
+				sdk.NewEvent(
+					types.EventTypeMigrateGovDeposit,
+					sdk.NewAttribute(types.AttributeKeyProposalId, fmt.Sprintf("%d", proposalID)),
+					sdk.NewAttribute(sdk.AttributeKeyAmount, fromDeposit.Amount.String()),
+				),
+			)
+
 			fromDeposit.Depositor = sdk.AccAddress(to.Bytes()).String()
 			fromDeposit.Amount = amount
 			govStore.Delete(govtypes.DepositKey(fromDeposit.ProposalId, from))
@@ -71,6 +83,15 @@ func (m *GovMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAddress, to 
 			if toFound {
 				amount = amount.Add(toDeposit.Amount...)
 			}
+
+			events = append(events,
+				sdk.NewEvent(
+					types.EventTypeMigrateGovDeposit,
+					sdk.NewAttribute(types.AttributeKeyProposalId, fmt.Sprintf("%d", proposalID)),
+					sdk.NewAttribute(sdk.AttributeKeyAmount, fromDeposit.Amount.String()),
+				),
+			)
+
 			fromDeposit.Depositor = sdk.AccAddress(to.Bytes()).String()
 			fromDeposit.Amount = amount
 			govStore.Delete(govtypes.DepositKey(proposalID, from))
@@ -85,7 +106,20 @@ func (m *GovMigrate) Execute(ctx sdk.Context, k Keeper, from sdk.AccAddress, to 
 			fromVote.Voter = sdk.AccAddress(to.Bytes()).String()
 			govStore.Delete(govtypes.VoteKey(proposalID, from))
 			govStore.Set(govtypes.VoteKey(proposalID, to.Bytes()), k.cdc.MustMarshal(&fromVote))
+
+			//add events
+			events = append(events,
+				sdk.NewEvent(
+					types.EventTypeMigrateGovVote,
+					sdk.NewAttribute(types.AttributeKeyProposalId, fmt.Sprintf("%d", proposalID)),
+					sdk.NewAttribute(types.AttributeKeyVoteOption, fromVote.Option.String()), //nolint
+				),
+			)
 		}
+	}
+
+	if len(events) > 0 {
+		ctx.EventManager().EmitEvents(events)
 	}
 	return nil
 }
