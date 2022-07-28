@@ -2,6 +2,7 @@ package keys
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 
@@ -132,6 +133,9 @@ func ImportKeyCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			//ioutil.ReadFile read all data, contains line break at the end of a file
+			bz = bytes.TrimSuffix(bz, []byte{'\n'})
+
 			if len(bz) == 64 {
 				priv, err := ethcrypto.HexToECDSA(string(bz))
 				if err != nil {
