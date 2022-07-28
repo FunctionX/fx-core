@@ -31,7 +31,7 @@ const (
 	testnetIBCRouterBlock = 3433511
 
 	testnetSupportDenomManyToOneBlock = 3918000
-	testnetSupportDenomOneToManyBlock = 4140000
+	testnetSupportDenomOneToManyBlock = 4028000
 )
 
 // SupportDenomManyToOneMsgTypes return msg types
