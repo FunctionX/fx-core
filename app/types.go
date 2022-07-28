@@ -1,12 +1,35 @@
 package app
 
 import (
+	"math/big"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	ethermint "github.com/evmos/ethermint/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	fxtypes "github.com/functionx/fx-core/v2/types"
+	bsctypes "github.com/functionx/fx-core/v2/x/bsc/types"
+	crosschaintypes "github.com/functionx/fx-core/v2/x/crosschain/types"
+	polygontypes "github.com/functionx/fx-core/v2/x/polygon/types"
+	trontypes "github.com/functionx/fx-core/v2/x/tron/types"
 )
+
+func init() {
+	// set chain id function
+	ethermint.SetParseChainIDFunc(func(chainID string) (*big.Int, error) {
+		return fxtypes.EIP155ChainID(), nil
+	})
+	ethermint.SetValidChainIDFunc(func(chainId string) bool {
+		return fxtypes.ChainId() == chainId
+	})
+
+	crosschaintypes.RegisterValidateBasic(bsctypes.ModuleName, crosschaintypes.EthereumMsgValidate{})
+	crosschaintypes.RegisterValidateBasic(polygontypes.ModuleName, crosschaintypes.EthereumMsgValidate{})
+	crosschaintypes.RegisterValidateBasic(trontypes.ModuleName, trontypes.TronMsgValidate{})
+}
 
 // CosmosApp implements the common methods for a Cosmos SDK-based application
 // specific blockchain.

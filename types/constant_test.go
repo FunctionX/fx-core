@@ -1,12 +1,10 @@
-package app
+package types
 
 import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-
-	fxtypes "github.com/functionx/fx-core/v2/types"
 )
 
 func Test_Address(t *testing.T) {
@@ -21,7 +19,7 @@ func Test_Address(t *testing.T) {
 func Test_NormalizeCoin(t *testing.T) {
 	denom, err := sdk.GetBaseDenom()
 	assert.NoError(t, err)
-	assert.Equal(t, fxtypes.DefaultDenom, denom)
-	coin := sdk.NewCoin(fxtypes.DefaultDenom, sdk.NewInt(1e18))
+	assert.Equal(t, DefaultDenom, denom)
+	coin := sdk.NewCoin(DefaultDenom, sdk.NewInt(1e18))
 	assert.Equal(t, coin, sdk.NormalizeCoin(coin))
 }
