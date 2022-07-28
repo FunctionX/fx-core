@@ -3,11 +3,12 @@ package cli
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	cfg "github.com/tendermint/tendermint/config"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
@@ -84,10 +85,8 @@ func UnsafeRestPrivValidatorCmd() *cobra.Command {
 		Args:  cobra.RangeArgs(0, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serverCtx := server.GetServerContextFromCmd(cmd)
-			rootDir := serverCtx.Viper.GetString(flags.FlagHome)
-			if len(rootDir) <= 0 {
-				return errors.New("please set the home directory")
-			}
+			cfg.EnsureRoot(serverCtx.Config.RootDir)
+
 			unsafe := serverCtx.Viper.GetBool(flagUnsafe)
 			resetKey := serverCtx.Viper.GetBool(flagResetPrivKey)
 			if (unsafe && !resetKey) || (!unsafe && resetKey) {
@@ -145,10 +144,8 @@ func UnsafeResetNodeKeyCmd() *cobra.Command {
 		Args:  cobra.RangeArgs(0, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serverCtx := server.GetServerContextFromCmd(cmd)
-			rootDir := serverCtx.Viper.GetString(flags.FlagHome)
-			if len(rootDir) <= 0 {
-				return errors.New("please set the home directory")
-			}
+			cfg.EnsureRoot(serverCtx.Config.RootDir)
+
 			unsafe := serverCtx.Viper.GetBool(flagUnsafe)
 			resetKey := serverCtx.Viper.GetBool(flagResetNodeKey)
 			if (unsafe && !resetKey) || (!unsafe && resetKey) {

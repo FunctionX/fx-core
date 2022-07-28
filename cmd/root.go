@@ -133,14 +133,6 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig app.EncodingConfig) {
 		txCommand(),
 	)
 
-	for _, command := range rootCmd.Commands() {
-		// tendermint add update validator key command
-		if command.Use == "tendermint" {
-			command.AddCommand(appCmd.UnsafeRestPrivValidatorCmd())
-			command.AddCommand(appCmd.UnsafeResetNodeKeyCmd())
-		}
-	}
-
 	// add rosetta
 	rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Marshaler))
 }
