@@ -37,6 +37,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v2.2.1] - 2022-07-28
+
+### Bug Fixes
+
+* Fix transaction msg `MsgConvertCoin` `MsgConvertERC20` too much gas
+* Fix crosschain to ethereum
+* Fix tendermint subcommand
+
+## [v2.2.0] - 2022-07-22
+
 ### Features
 
 * Add query oracle reward in the crosschain module
