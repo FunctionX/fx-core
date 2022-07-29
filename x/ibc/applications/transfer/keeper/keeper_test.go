@@ -1,8 +1,9 @@
 package keeper_test
 
 import (
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"testing"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"

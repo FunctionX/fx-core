@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/spf13/cobra"

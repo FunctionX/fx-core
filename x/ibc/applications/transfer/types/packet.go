@@ -1,9 +1,10 @@
 package types
 
 import (
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strings"
 	"time"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

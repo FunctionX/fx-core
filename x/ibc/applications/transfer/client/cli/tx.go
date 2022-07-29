@@ -3,9 +3,10 @@ package cli
 import (
 	"errors"
 	"fmt"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strings"
 	"time"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 

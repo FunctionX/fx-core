@@ -1,8 +1,9 @@
 package transfer_test
 
 import (
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"testing"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	fxtypes "github.com/functionx/fx-core/v2/types"
 

@@ -41,7 +41,7 @@ type IBCMiddleware struct {
 }
 
 func (im IBCMiddleware) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI) error {
-	return im.keeper.SendTransfer(ctx, chanCap, packet)
+	return im.keeper.SendPacket(ctx, chanCap, packet)
 }
 
 func (im IBCMiddleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI, ack exported.Acknowledgement) error {
@@ -67,19 +67,7 @@ func (im IBCMiddleware) OnRecvPacket(
 
 	var data types.FungibleTokenPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		var ibcPacketData transfertypes.FungibleTokenPacketData
-		if err = types.ModuleCdc.UnmarshalJSON(packet.GetData(), &ibcPacketData); err != nil {
-			ack = channeltypes.NewErrorAcknowledgement("cannot unmarshal ICS-20 transfer packet data")
-		} else {
-			data = types.FungibleTokenPacketData{
-				Denom:    ibcPacketData.GetDenom(),
-				Amount:   ibcPacketData.GetAmount(),
-				Sender:   ibcPacketData.GetSender(),
-				Receiver: ibcPacketData.GetReceiver(),
-				Router:   "",
-				Fee:      sdk.ZeroInt().String(),
-			}
-		}
+		ack = channeltypes.NewErrorAcknowledgement("cannot unmarshal ICS-20 transfer packet data")
 	}
 
 	// only attempt the application logic if the packet data
@@ -91,9 +79,9 @@ func (im IBCMiddleware) OnRecvPacket(
 		var err error
 		// if router set, route packet
 		if ctx.BlockHeight() >= fxtypes.IBCRouteBlock() && data.Router != "" {
-			err = im.keeper.OnRecvPacket(ctx, packet, data)
+			err = im.keeper.FxOnRecvPacket(ctx, packet, data)
 		} else {
-			err = handlerForwardTransferPacket(ctx, im, packet, data)
+			err = handlerForwardTransferPacket(ctx, im, packet, transfertypes.NewFungibleTokenPacketData(data.GetDenom(), data.GetAmount(), data.GetSender(), data.GetReceiver()))
 		}
 
 		if err != nil {
@@ -195,7 +183,7 @@ func (im IBCMiddleware) OnTimeoutPacket(
 	return nil
 }
 
-func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet channeltypes.Packet, data types.FungibleTokenPacketData) error {
+func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet channeltypes.Packet, data transfertypes.FungibleTokenPacketData) error {
 	// parse out any forwarding info
 	receiver, finalDest, port, channel, err := ParseIncomingTransferField(data.Receiver)
 	switch {
@@ -220,7 +208,7 @@ func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet chan
 		newPacket := packet
 		newPacket.Data = bz
 
-		if err := im.keeper.OnRecvPacket(ctx, newPacket, newData); err != nil {
+		if err = im.keeper.OnRecvPacket(ctx, newPacket, newData); err != nil {
 			return err
 		}
 		// recalculate denom, skip checks that were already done in app.OnRecvPacket
@@ -232,10 +220,7 @@ func handlerForwardTransferPacket(ctx sdk.Context, im IBCMiddleware, packet chan
 		}
 
 		var token = sdk.NewCoin(denom, transferAmount)
-
-		if err = im.keeper.SendFxTransfer(ctx, port, channel, token, receiver, finalDest,
-			clienttypes.Height{}, uint64(ctx.BlockTime().Add(ForwardPacketTimeHour*time.Hour).UnixNano()),
-			"", sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
+		if err = im.keeper.SendTransfer(ctx, port, channel, token, receiver, finalDest, clienttypes.Height{}, uint64(ctx.BlockTime().Add(ForwardPacketTimeHour*time.Hour).UnixNano())); err != nil {
 			return fmt.Errorf("failed to forward transfer packet")
 		}
 		defer func() {

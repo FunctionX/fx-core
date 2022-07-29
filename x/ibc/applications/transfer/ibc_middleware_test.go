@@ -2,9 +2,10 @@ package transfer_test
 
 import (
 	"fmt"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"math"
 	"testing"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/stretchr/testify/require"
 
