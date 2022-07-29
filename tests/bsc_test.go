@@ -2,8 +2,9 @@ package tests
 
 import (
 	"fmt"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"testing"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"

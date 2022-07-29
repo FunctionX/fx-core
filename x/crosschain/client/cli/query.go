@@ -3,9 +3,10 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strconv"
 	"strings"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/ethereum/go-ethereum/crypto"

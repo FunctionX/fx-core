@@ -2,8 +2,9 @@ package types
 
 import (
 	"fmt"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"strings"
+
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
