@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +13,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	bsctypes "github.com/functionx/fx-core/v2/x/bsc/types"
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 type BSCTestSuite struct {
@@ -28,7 +28,7 @@ func TestBSCTestSuite(t *testing.T) {
 func (suite *BSCTestSuite) TestCrosschain_BSC() {
 	const purseToken = "0xFBBbB4f7B1e5bCb0345c5A5a61584B2547d5D582"
 	const purseTokenChannelIBC = "transfer/channel-0"
-	purseDenom := types.DenomTrace{
+	purseDenom := transfertypes.DenomTrace{
 		Path:      purseTokenChannelIBC,
 		BaseDenom: fmt.Sprintf("%s%s", suite.chainName, purseToken),
 	}.IBCDenom()

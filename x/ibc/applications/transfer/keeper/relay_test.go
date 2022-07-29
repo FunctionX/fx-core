@@ -233,7 +233,7 @@ func (suite *KeeperTestSuite) TestOnRecvPacket() {
 			data := types.NewFungibleTokenPacketData(trace.GetFullDenomPath(), amount.String(), suite.chainA.SenderAccount.GetAddress().String(), receiver, defaultMsgRouter, sdk.ZeroInt().String())
 			packet := channeltypes.NewPacket(data.GetBytes(), seq, path.EndpointA.ChannelConfig.PortID, path.EndpointA.ChannelID, path.EndpointB.ChannelConfig.PortID, path.EndpointB.ChannelID, clienttypes.NewHeight(0, 100), 0)
 
-			err = suite.chainB.GetSimApp().TransferKeeper.OnRecvPacket(suite.chainB.GetContext(), packet, data)
+			err = suite.chainB.GetSimApp().TransferKeeper.FxOnRecvPacket(suite.chainB.GetContext(), packet, data)
 
 			if tc.expPass {
 				suite.Require().NoError(err)

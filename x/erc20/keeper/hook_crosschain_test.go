@@ -214,7 +214,7 @@ type IBCTransferSimulate struct {
 	T *testing.T
 }
 
-func (it *IBCTransferSimulate) SendTransfer(ctx sdk.Context, sourcePort, sourceChannel string, token sdk.Coin, sender sdk.AccAddress,
+func (it *IBCTransferSimulate) SendFxTransfer(ctx sdk.Context, sourcePort, sourceChannel string, token sdk.Coin, sender sdk.AccAddress,
 	receiver string, timeoutHeight ibcclienttypes.Height, timeoutTimestamp uint64, router string, fee sdk.Coin) error {
 	require.Equal(it.T, token.Amount.BigInt(), ibcTransferAmount)
 	return nil

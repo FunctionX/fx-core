@@ -28,9 +28,9 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"github.com/functionx/fx-core/v2/x/crosschain"
 	"github.com/functionx/fx-core/v2/x/crosschain/types"
-	ibcTransferTypes "github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 )
 
 type IntegrationTestSuite struct {
@@ -172,7 +172,7 @@ func (suite *IntegrationTestSuite) TestABCIEndBlockDepositClaim() {
 	if len(addBridgeTokenClaim.ChannelIbc) > 0 {
 		channel, err := hex.DecodeString(addBridgeTokenClaim.ChannelIbc)
 		require.NoError(suite.T(), err)
-		tokenName = ibcTransferTypes.DenomTrace{
+		tokenName = transfertypes.DenomTrace{
 			Path:      string(channel),
 			BaseDenom: fmt.Sprintf("%s%s", suite.chainName, bridgeToken),
 		}.IBCDenom()
