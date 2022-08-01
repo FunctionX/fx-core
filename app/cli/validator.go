@@ -81,7 +81,7 @@ func ValidatorCommand() *cobra.Command {
 func UnsafeRestPrivValidatorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unsafe-reset-priv-validator [secret]",
-		Short: "(unsafe) Reset validator node consensus private key file (~/.fxcore/config/priv_validator_key.json)",
+		Short: "(unsafe) Reset validator node consensus private key file (priv_validator_key.json)",
 		Args:  cobra.RangeArgs(0, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serverCtx := server.GetServerContextFromCmd(cmd)
@@ -140,7 +140,7 @@ func UnsafeRestPrivValidatorCmd() *cobra.Command {
 func UnsafeResetNodeKeyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unsafe-reset-node-key [secret]",
-		Short: "(unsafe) reset node key file (~/.fxcore/config/node_key.json)",
+		Short: "(unsafe) reset node key file (node_key.json)",
 		Args:  cobra.RangeArgs(0, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serverCtx := server.GetServerContextFromCmd(cmd)

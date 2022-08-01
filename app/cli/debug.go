@@ -45,7 +45,6 @@ func Debug() *cobra.Command {
 		Base64ToString(),
 		ModuleAddressCmd(),
 		CovertTxDataToHash(),
-		ParseTx(),
 		ChecksumEthAddress(),
 		PubkeyCmd(),
 		VerifyTx(),
@@ -117,37 +116,11 @@ func ModuleAddressCmd() *cobra.Command {
 	return cmd
 }
 
-func ParseTx() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "parse-tx [base64TxData]",
-		Short:   "parse tx  base64 tx data and print",
-		Example: "fxcored debug parse-tx CucHC===...",
-		Args:    cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := client.GetClientContextFromCmd(cmd)
-			txBytes, err := base64.StdEncoding.DecodeString(args[0])
-			if err != nil {
-				return err
-			}
-			tx, err := clientCtx.TxConfig.TxDecoder()(txBytes)
-			if err != nil {
-				return err
-			}
-			jsonMarshal, err := clientCtx.TxConfig.TxJSONEncoder()(tx)
-			if err != nil {
-				return err
-			}
-			return clientCtx.PrintString(string(jsonMarshal) + "\n")
-		},
-	}
-	return cmd
-}
-
 func VerifyTx() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "verify-tx [base64TxData]",
 		Short:   "verify tx",
-		Example: "fxcored debug verify-tx CucHC===...",
+		Example: fmt.Sprintf("%s debug verify-tx 'CucHC...==='", version.AppName),
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -231,7 +204,7 @@ func CovertTxDataToHash() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "tx-hash [base64TxData]",
 		Short:   "covert base64 tx data to txHash",
-		Example: "fxcored debug tx-hash CucHC===...",
+		Example: fmt.Sprintf("%s debug tx-hash 'CucHC...==='", version.AppName),
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBytes, err := base64.StdEncoding.DecodeString(args[0])
@@ -239,7 +212,7 @@ func CovertTxDataToHash() *cobra.Command {
 				return err
 			}
 			hashBytes := sha256.Sum256(txBytes)
-			cmd.Println(fmt.Sprintf("%X\n", hashBytes))
+			cmd.Println(fmt.Sprintf("%X", hashBytes))
 			return nil
 		},
 	}

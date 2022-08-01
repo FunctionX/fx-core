@@ -42,7 +42,7 @@ import (
 
 // SimAppChainID hardcoded chainID for simulation
 const (
-	SimAppChainID = "fxcore-app"
+	SimAppChainID = "sim-app"
 )
 
 // DefaultConsensusParams defines the default Tendermint consensus params used
