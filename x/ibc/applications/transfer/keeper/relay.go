@@ -226,6 +226,7 @@ func (k Keeper) FxOnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data
 		cacheCtx, writeFn := ctx.CacheContext()
 		err = route.TransferAfter(cacheCtx, receiver.String(), data.Receiver, ibcAmount, ibcFee)
 		routerEvent := sdk.NewEvent(types.EventTypeReceiveRoute,
+			sdk.NewAttribute(types.AttributeKeyRoute, data.Router),
 			sdk.NewAttribute(types.AttributeKeyRouteSuccess, fmt.Sprintf("%t", err == nil)),
 		)
 		switch err {
