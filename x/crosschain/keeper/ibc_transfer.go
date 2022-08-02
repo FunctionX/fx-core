@@ -71,11 +71,10 @@ func (k Keeper) handleIbcTransfer(ctx sdk.Context, claim *types.MsgSendToFxClaim
 	}
 	logger.Info("crosschain start ibc transfer", "sender", receiveAddr, "receive", ibcReceiveAddress, "coin", coin, "destCurrentHeight", clientStateHeight.GetRevisionHeight(), "destTimeoutHeight", destTimeoutHeight, "nextSequenceSend", nextSequenceSend)
 
-	if err = k.ibcTransferKeeper.SendFxTransfer(ctx,
+	if err = k.ibcTransferKeeper.SendTransfer(ctx,
 		targetIBC.SourcePort, targetIBC.SourceChannel,
 		coin, receiveAddr, ibcReceiveAddress,
-		ibcTimeoutHeight, 0,
-		"", sdk.NewCoin(coin.Denom, sdk.ZeroInt())); err != nil {
+		ibcTimeoutHeight, 0); err != nil {
 		logger.Error("crosschain ibc transfer fail", "sender", receiveAddr, "receive", ibcReceiveAddress, "coin", coin, "err", err)
 		return
 	}

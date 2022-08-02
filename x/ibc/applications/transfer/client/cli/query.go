@@ -2,6 +2,9 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/cosmos/cosmos-sdk/version"
 
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 

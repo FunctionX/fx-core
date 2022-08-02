@@ -125,7 +125,7 @@ func (suite *KeeperTestSuite) TestSendTransfer() {
 				suite.Require().NoError(err) // message committed
 			}
 
-			err = suite.chainA.GetSimApp().TransferKeeper.SendFxTransfer(
+			err = suite.chainA.GetSimApp().TransferKeeper.FxSendTransfer(
 				suite.chainA.GetContext(), path.EndpointA.ChannelConfig.PortID, path.EndpointA.ChannelID, amount,
 				suite.chainA.SenderAccount.GetAddress(), suite.chainB.SenderAccount.GetAddress().String(), clienttypes.NewHeight(0, 110), 0,
 				defaultMsgRouter, sdk.NewCoin(amount.GetDenom(), sdk.ZeroInt()),

@@ -140,21 +140,20 @@ func (k Keeper) TransferIBCHandler(ctx sdk.Context, from sdk.AccAddress, to stri
 		logger.Error("validate ibc receive address", "address", to, "prefix", targetIBC.Prefix, "err", err.Error())
 		return fmt.Errorf("invalid to address %s", to)
 	}
-	_, _, err := k.ibcChannelKeeper.GetChannelClientState(ctx, targetIBC.SourcePort, targetIBC.SourceChannel)
-	if err != nil {
-		return err
-	}
+
 	params := k.GetParams(ctx)
-	ibcTimeoutHeight := ibcclienttypes.ZeroHeight()
 	ibcTimeoutTimestamp := uint64(ctx.BlockTime().UnixNano()) + uint64(params.IbcTimeout)
 	nextSequenceSend, found := k.ibcChannelKeeper.GetNextSequenceSend(ctx, targetIBC.SourcePort, targetIBC.SourceChannel)
 	if !found {
 		return fmt.Errorf("ibc channel next sequence send not found, port %s, channel %s", targetIBC.SourcePort, targetIBC.SourceChannel)
 	}
-	logger.Info("ibc transfer", "port", targetIBC.SourcePort, "channel", targetIBC.SourceChannel, "sequence", nextSequenceSend, "timeout-height", ibcTimeoutHeight)
-	if err := k.ibcTransferKeeper.SendFxTransfer(
-		ctx, targetIBC.SourcePort, targetIBC.SourceChannel, amount, from.Bytes(),
-		to, ibcTimeoutHeight, ibcTimeoutTimestamp, "", fee); err != nil {
+	// TODO: ibc transfer is not fee 2022-08-02
+	// 1. if fee is not zero, return error
+	// 2. if fee is not zero, amount = amount + fee
+	ibcAmount := amount.Add(fee)
+	if err := k.ibcTransferKeeper.SendTransfer(
+		ctx, targetIBC.SourcePort, targetIBC.SourceChannel, ibcAmount, from.Bytes(),
+		to, ibcclienttypes.ZeroHeight(), ibcTimeoutTimestamp); err != nil {
 		return err
 	}
 	k.setIBCTransferHash(ctx, targetIBC.SourcePort, targetIBC.SourceChannel, nextSequenceSend, receipt.TxHash)

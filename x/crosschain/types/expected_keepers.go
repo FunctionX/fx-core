@@ -48,7 +48,7 @@ type IBCChannelKeeper interface {
 }
 
 type IBCTransferKeeper interface {
-	SendFxTransfer(
+	SendTransfer(
 		ctx sdk.Context,
 		sourcePort,
 		sourceChannel string,
@@ -57,8 +57,6 @@ type IBCTransferKeeper interface {
 		receiver string,
 		timeoutHeight clienttypes.Height,
 		timeoutTimestamp uint64,
-		router string,
-		fee sdk.Coin,
 	) error
 	SetDenomTrace(ctx sdk.Context, denomTrace transfertypes.DenomTrace)
 }

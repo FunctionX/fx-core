@@ -20,7 +20,7 @@ import (
 	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 )
 
-// SendFxTransfer handles transfer sending logic. There are 2 possible cases:
+// FxSendTransfer handles transfer sending logic. There are 2 possible cases:
 //
 // 1. Sender chain is acting as the source zone. The coins are transferred
 // to an escrow address (i.e locked) on the sender chain and then transferred
@@ -52,7 +52,7 @@ import (
 // 4. A -> C : sender chain is sink zone. Denom upon receiving: 'C/B/denom'
 // 5. C -> B : sender chain is sink zone. Denom upon receiving: 'B/denom'
 // 6. B -> A : sender chain is sink zone. Denom upon receiving: 'denom'
-func (k Keeper) SendFxTransfer(
+func (k Keeper) FxSendTransfer(
 	ctx sdk.Context,
 	sourcePort,
 	sourceChannel string,

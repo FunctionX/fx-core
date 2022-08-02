@@ -25,7 +25,7 @@ func (k Keeper) Transfer(goCtx context.Context, msg *types.MsgTransfer) (*types.
 	if err != nil {
 		return nil, err
 	}
-	if err = k.SendFxTransfer(
+	if err = k.FxSendTransfer(
 		ctx, msg.SourcePort, msg.SourceChannel, msg.Token, sender, msg.Receiver, msg.TimeoutHeight, msg.TimeoutTimestamp, msg.Router, sdk.NewCoin(msg.Token.Denom, msg.Fee.Amount),
 	); err != nil {
 		return nil, err

@@ -2,11 +2,13 @@ package keeper
 
 import (
 	"fmt"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+
 	_ "github.com/functionx/fx-core/v2/types"
 	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
-	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestParseReceiveAndAmountByPacket(t *testing.T) {
@@ -74,7 +76,7 @@ func TestParsePacketAddress(t *testing.T) {
 		{"normal cosmos address", "cosmos1yef9232palu3ps25ldjr62ck046rgd82l68dnq", true, nil, "fx1yef9232palu3ps25ldjr62ck046rgd8292kc73"},
 		{"normal eip address", "0x2652554541Eff910C154fB643d2b167D743434EA", true, nil, "fx1yef9232palu3ps25ldjr62ck046rgd8292kc73"},
 
-		{"err bech32 addres - kc74", "fx1yef9232palu3ps25ldjr62ck046rgd8292kc74", false, fmt.Errorf("decoding bech32 failed: invalid checksum (expected 92kc73 got 92kc74)"), ""},
+		{"err bech32 address - kc74", "fx1yef9232palu3ps25ldjr62ck046rgd8292kc74", false, fmt.Errorf("decoding bech32 failed: invalid checksum (expected 92kc73 got 92kc74)"), ""},
 		{"err lowercase eip address", "0x2652554541eff910c154fb643d2b167d743434ea", false, fmt.Errorf("decoding bech32 failed: invalid checksum (expected j389ls got 3434ea)"), ""},
 	}
 

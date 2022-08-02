@@ -18,6 +18,7 @@ import (
 	transfettypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+
 	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 	ibctesting "github.com/functionx/fx-core/v2/x/ibc/testing"
 )
@@ -346,7 +347,7 @@ func (suite *KeeperTestSuite) TestModelBasedRelay() {
 						if !ok {
 							panic("MBT failed to parse amount from string")
 						}
-						err = suite.chainB.GetSimApp().TransferKeeper.SendFxTransfer(
+						err = suite.chainB.GetSimApp().TransferKeeper.FxSendTransfer(
 							suite.chainB.GetContext(),
 							tc.packet.SourcePort,
 							tc.packet.SourceChannel,

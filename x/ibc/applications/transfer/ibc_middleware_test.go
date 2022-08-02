@@ -2,9 +2,10 @@ package transfer_test
 
 import (
 	"fmt"
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
 	"math"
 	"testing"
+
+	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
 
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 

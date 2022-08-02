@@ -80,8 +80,8 @@ type CrossChainKeeper interface {
 }
 
 type IBCTransferKeeper interface {
-	SendFxTransfer(ctx sdk.Context, sourcePort, sourceChannel string, token sdk.Coin, sender sdk.AccAddress,
-		receiver string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64, router string, fee sdk.Coin) error
+	SendTransfer(ctx sdk.Context, sourcePort, sourceChannel string, token sdk.Coin, sender sdk.AccAddress,
+		receiver string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64) error
 }
 
 type IBCChannelKeeper interface {
