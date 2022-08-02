@@ -6,8 +6,6 @@ import (
 
 	coretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
 
-	"github.com/cosmos/cosmos-sdk/types/bech32"
-
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
@@ -195,7 +193,7 @@ func (k Keeper) FxOnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data
 		return err
 	}
 
-	receiver, transferAmount, feeAmount, err := parseReceiveAndAmount(data)
+	receiver, transferAmount, feeAmount, err := parseReceiveAndAmountByPacket(data)
 	if err != nil {
 		return err
 	}
@@ -220,19 +218,13 @@ func (k Keeper) FxOnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data
 		return nil
 	}
 	if route, exists := k.Router.GetRoute(data.Router); exists {
-		// ignore route error
-		_, sendAddrBytes, err := bech32.DecodeAndConvert(data.Sender)
-		if err != nil {
-			ctx.Logger().Info("IBCTransfer", "route err! invalid data sender address:%v", data.Sender, "sourceChannel", packet.GetSourceChannel(), "destChannel", packet.GetDestChannel(), "sequence", packet.GetSequence())
-			return nil
-		}
 		ibcAmount := sdk.NewCoin(receiveDenom, transferAmount)
 		ibcFee := sdk.NewCoin(receiveDenom, feeAmount)
 		ctx.Logger().Info("IBCTransfer", "transfer route sourceChannel", packet.GetSourceChannel(),
-			"destChannel", packet.GetDestChannel(), "sequence", packet.GetSequence(), "sender", sdk.AccAddress(sendAddrBytes).String(),
+			"destChannel", packet.GetDestChannel(), "sequence", packet.GetSequence(), "sender", receiver.String(),
 			"receive", data.Receiver, "amount", ibcAmount, "fee", ibcFee, "router", data.Router)
 		cacheCtx, writeFn := ctx.CacheContext()
-		err = route.TransferAfter(cacheCtx, sdk.AccAddress(sendAddrBytes).String(), data.Receiver, ibcAmount, ibcFee)
+		err = route.TransferAfter(cacheCtx, receiver.String(), data.Receiver, ibcAmount, ibcFee)
 		routerEvent := sdk.NewEvent(types.EventTypeReceiveRoute,
 			sdk.NewAttribute(types.AttributeKeyRouteSuccess, fmt.Sprintf("%t", err == nil)),
 		)
@@ -249,78 +241,6 @@ func (k Keeper) FxOnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data
 		return nil
 	}
 	return nil
-}
-
-func parseIBCCoinDenom(packet channeltypes.Packet, packetDenom string) string {
-	// This is the prefix that would have been prefixed to the denomination
-	// on sender chain IF and only if the token originally came from the
-	// receiving chain.
-	//
-	// NOTE: We use SourcePort and SourceChannel here, because the counterparty
-	// chain would have prefixed with DestPort and DestChannel when originally
-	// receiving this coin as seen in the "sender chain is the source" condition.
-
-	var receiveDenom string
-	if transfertypes.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), packetDenom) {
-		// sender chain is not the source, unescrow tokens
-
-		// remove prefix added by sender chain
-		voucherPrefix := transfertypes.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
-		unprefixedDenom := packetDenom[len(voucherPrefix):]
-
-		// coin denomination used in sending from the escrow address
-		denom := unprefixedDenom
-
-		// The denomination used to send the coins is either the native denom or the hash of the path
-		// if the denomination is not native.
-		denomTrace := transfertypes.ParseDenomTrace(unprefixedDenom)
-		if denomTrace.Path != "" {
-			denom = denomTrace.IBCDenom()
-		}
-		receiveDenom = denom
-	} else {
-		// sender chain is the source, mint vouchers
-
-		// since SendPacket did not prefix the denomination, we must prefix denomination here
-		sourcePrefix := transfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
-		// NOTE: sourcePrefix contains the trailing "/"
-		prefixedDenom := sourcePrefix + packetDenom
-
-		// construct the denomination trace from the full raw denomination
-		denomTrace := transfertypes.ParseDenomTrace(prefixedDenom)
-
-		voucherDenom := denomTrace.IBCDenom()
-		receiveDenom = voucherDenom
-	}
-	return receiveDenom
-}
-
-func parseReceiveAndAmount(data types.FungibleTokenPacketData) (sdk.AccAddress, sdk.Int, sdk.Int, error) {
-	// parse the transfer amount
-	transferAmount, ok := sdk.NewIntFromString(data.Amount)
-	if !ok {
-		return nil, sdk.Int{}, sdk.Int{}, sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "unable to parse transfer amount (%s) into sdk.Int", data.Amount)
-	}
-
-	if data.Router != "" {
-		_, addressBytes, err := bech32.DecodeAndConvert(data.Sender)
-		if err != nil {
-			return nil, sdk.Int{}, sdk.Int{}, err
-		}
-		feeAmount, ok := sdk.NewIntFromString(data.Fee)
-		if !ok || feeAmount.IsNegative() {
-			return nil, sdk.Int{}, sdk.Int{}, sdkerrors.Wrapf(transfertypes.ErrInvalidAmount, "fee amount is invalid:%s", data.Fee)
-		}
-		return addressBytes, transferAmount, feeAmount, nil
-	}
-
-	// decode the receiver address
-	receiverAddr, err := sdk.AccAddressFromBech32(data.Receiver)
-	if err != nil {
-		return nil, sdk.Int{}, sdk.Int{}, err
-	}
-	return receiverAddr, transferAmount, sdk.ZeroInt(), nil
-
 }
 
 // OnAcknowledgementPacket responds to the the success or failure of a packet

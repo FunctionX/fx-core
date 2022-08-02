@@ -2,14 +2,13 @@ package transfer_test
 
 import (
 	"fmt"
+	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
 	"math"
 	"testing"
 
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer"
 
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 

@@ -34,7 +34,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 	suite.chainC = suite.coordinator.GetChain(ibctesting.GetChainID(3))
 
 	queryHelper := baseapp.NewQueryServerTestHelper(suite.chainA.GetContext(), suite.chainA.GetSimApp().InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, suite.chainA.GetSimApp().TransferKeeper)
+	types.RegisterQueryServer(queryHelper, suite.chainA.GetSimApp().IBCTransferKeeper)
 	suite.queryClient = types.NewQueryClient(queryHelper)
 }
 
@@ -51,7 +51,7 @@ func NewTransferPath(chainA, chainB *ibctesting.TestChain) *ibctesting.Path {
 func (suite *KeeperTestSuite) TestGetTransferAccount() {
 	expectedMaccAddr := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
 
-	macc := suite.chainA.GetSimApp().TransferKeeper.GetTransferAccount(suite.chainA.GetContext())
+	macc := suite.chainA.GetSimApp().IBCTransferKeeper.GetTransferAccount(suite.chainA.GetContext())
 
 	suite.Require().NotNil(macc)
 	suite.Require().Equal(types.ModuleName, macc.GetName())

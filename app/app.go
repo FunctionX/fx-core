@@ -774,21 +774,6 @@ func (app *App) Name() string {
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	if ctx.BlockHeight() == 1 {
-		// register coin
-		for _, metadata := range fxtypes.GetMetadata() {
-			ctx.Logger().Info("add metadata", "coin", metadata.String())
-			pair, err := app.Erc20Keeper.RegisterCoin(ctx, metadata)
-			if err != nil {
-				panic(fmt.Errorf("register %s: %s", metadata.Base, err.Error()))
-			}
-			ctx.EventManager().EmitEvent(sdk.NewEvent(
-				erc20types.EventTypeRegisterCoin,
-				sdk.NewAttribute(erc20types.AttributeKeyDenom, pair.Denom),
-				sdk.NewAttribute(erc20types.AttributeKeyTokenAddress, pair.Erc20Address),
-			))
-		}
-	}
 	return app.mm.BeginBlock(ctx, req)
 }
 

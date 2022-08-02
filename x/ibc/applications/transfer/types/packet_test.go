@@ -1,11 +1,9 @@
-package types_test
+package types
 
 import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/functionx/fx-core/v2/x/ibc/applications/transfer/types"
 
 	"github.com/stretchr/testify/require"
 )
@@ -26,19 +24,19 @@ var (
 func TestFungibleTokenPacketDataValidateBasic(t *testing.T) {
 	testCases := []struct {
 		name       string
-		packetData types.FungibleTokenPacketData
+		packetData FungibleTokenPacketData
 		expPass    bool
 	}{
-		{"valid packet", types.NewFungibleTokenPacketData(denom, amount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), true},
-		{"valid packet with large amount", types.NewFungibleTokenPacketData(denom, largeAmount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), true},
-		{"invalid denom", types.NewFungibleTokenPacketData("", amount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"invalid empty amount", types.NewFungibleTokenPacketData(denom, "", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"invalid zero amount", types.NewFungibleTokenPacketData(denom, "0", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"invalid negative amount", types.NewFungibleTokenPacketData(denom, "-1", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"invalid large amount", types.NewFungibleTokenPacketData(denom, invalidLargeAmount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"missing sender address", types.NewFungibleTokenPacketData(denom, amount, emptyAddr, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"missing recipient address", types.NewFungibleTokenPacketData(denom, amount, addr1, emptyAddr, defaultPacketRouter, defaultPacketFeeStr), false},
-		{"invalid negative fee", types.NewFungibleTokenPacketData(denom, amount, addr1, emptyAddr, defaultPacketRouter, "-1"), false},
+		{"valid packet", NewFungibleTokenPacketData(denom, amount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), true},
+		{"valid packet with large amount", NewFungibleTokenPacketData(denom, largeAmount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), true},
+		{"invalid denom", NewFungibleTokenPacketData("", amount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"invalid empty amount", NewFungibleTokenPacketData(denom, "", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"invalid zero amount", NewFungibleTokenPacketData(denom, "0", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"invalid negative amount", NewFungibleTokenPacketData(denom, "-1", addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"invalid large amount", NewFungibleTokenPacketData(denom, invalidLargeAmount, addr1, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"missing sender address", NewFungibleTokenPacketData(denom, amount, emptyAddr, addr2, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"missing recipient address", NewFungibleTokenPacketData(denom, amount, addr1, emptyAddr, defaultPacketRouter, defaultPacketFeeStr), false},
+		{"invalid negative fee", NewFungibleTokenPacketData(denom, amount, addr1, emptyAddr, defaultPacketRouter, "-1"), false},
 	}
 
 	for i, tc := range testCases {

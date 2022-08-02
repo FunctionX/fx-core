@@ -7,7 +7,7 @@ package ibctesting
 import (
 	"time"
 
-	_ "github.com/functionx/fx-core/v2/app"
+	_ "github.com/functionx/fx-core/v2/types"
 	fxtypes "github.com/functionx/fx-core/v2/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
