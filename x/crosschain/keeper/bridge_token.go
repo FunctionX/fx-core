@@ -16,8 +16,9 @@ func (k Keeper) GetBridgeTokenDenom(ctx sdk.Context, tokenContract string) *type
 		return nil
 	}
 	return &types.BridgeToken{
-		Denom: string(data),
-		Token: tokenContract,
+		Denom:     string(data),
+		Token:     tokenContract,
+		TokenType: k.GetTokenTypeByTokenContract(ctx, tokenContract),
 	}
 }
 
@@ -28,9 +29,16 @@ func (k Keeper) GetDenomBridgeToken(ctx sdk.Context, denom string) *types.Bridge
 		return nil
 	}
 	return &types.BridgeToken{
-		Denom: denom,
-		Token: string(data),
+		Denom:     denom,
+		Token:     string(data),
+		TokenType: k.GetTokenTypeByTokenContract(ctx, string(data)),
 	}
+}
+
+func (k Keeper) GetTokenTypeByTokenContract(ctx sdk.Context, tokenContract string) types.BridgeTokenType {
+	store := ctx.KVStore(k.storeKey)
+	data := store.Get(types.GetTokenTypeToTokenKey(tokenContract))
+	return types.BridgeTokenType(sdk.BigEndianToUint64(data))
 }
 
 func (k Keeper) HasBridgeToken(ctx sdk.Context, tokenContract string) bool {
@@ -38,10 +46,16 @@ func (k Keeper) HasBridgeToken(ctx sdk.Context, tokenContract string) bool {
 	return store.Has(types.GetDenomToTokenKey(tokenContract))
 }
 
+// Deprecated: use AddBridgeTokenWithTokenType
 func (k Keeper) AddBridgeToken(ctx sdk.Context, token, denom string) {
+	k.AddBridgeTokenWithTokenType(ctx, token, denom, types.BRIDGE_TOKEN_TYPE_ERC20)
+}
+
+func (k Keeper) AddBridgeTokenWithTokenType(ctx sdk.Context, token, denom string, tokenType types.BridgeTokenType) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetTokenToDenomKey(denom), []byte(token))
 	store.Set(types.GetDenomToTokenKey(token), []byte(denom))
+	store.Set(types.GetTokenTypeToTokenKey(token), sdk.Uint64ToBigEndian(uint64(tokenType)))
 }
 
 func (k Keeper) IterateBridgeTokenToDenom(ctx sdk.Context, cb func(*types.BridgeToken) bool) {

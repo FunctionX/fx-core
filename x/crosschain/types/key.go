@@ -119,6 +119,9 @@ var (
 
 	// LastSlashedRefundNonce indexes the latest slashed refund nonce
 	LastSlashedRefundNonce = []byte{0x46}
+
+	// TokenTypeToTokenKey prefixes the index of asset token type to external token
+	TokenTypeToTokenKey = []byte{0x47}
 )
 
 // GetOracleKey returns the following key format
@@ -235,4 +238,8 @@ func GetRefundConfirmKeyByNonce(nonce uint64) []byte {
 
 func GetRefundConfirmNonceKey(nonce uint64) []byte {
 	return append(BridgeCallRefundConfirmKey, sdk.Uint64ToBigEndian(nonce)...)
+}
+
+func GetTokenTypeToTokenKey(tokenContract string) []byte {
+	return append(TokenTypeToTokenKey, []byte(tokenContract)...)
 }

@@ -335,7 +335,7 @@ func (suite *KeeperTestSuite) TestOnRecvPacket() {
 			name: "pass - normal - sender is 0xAddress router is bsc",
 			malleate: func(packet *channeltypes.Packet) {
 				bscKeeper := suite.GetApp(suite.chainA.App).BscKeeper
-				bscKeeper.AddBridgeToken(suite.chainA.GetContext(), common.BytesToAddress(tmrand.Bytes(20)).String(), ibcDenomTrace.IBCDenom())
+				bscKeeper.AddBridgeToken(suite.chainA.GetContext(), common.BytesToAddress(tmrand.Bytes(20)).String(), ibcDenomTrace.IBCDenom()) // nolint:staticcheck
 				packetData := fxtransfertypes.FungibleTokenPacketData{}
 				fxtransfertypes.ModuleCdc.MustUnmarshalJSON(packet.GetData(), &packetData)
 				packetData.Sender = common.BytesToAddress(senderAddr.Bytes()).String()

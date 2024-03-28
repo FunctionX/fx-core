@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"fmt"
 
+	tmrand "github.com/tendermint/tendermint/libs/rand"
+
 	"github.com/functionx/fx-core/v7/testutil/helpers"
 	"github.com/functionx/fx-core/v7/x/crosschain/types"
 )
@@ -13,9 +15,11 @@ func (suite *KeeperTestSuite) TestKeeper_BridgeToken() {
 	suite.NoError(err)
 	suite.Equal(fmt.Sprintf("%s%s", suite.chainName, tokenContract), denom)
 
-	suite.Keeper().AddBridgeToken(suite.ctx, tokenContract, denom)
+	bridgeTokenTypes := []types.BridgeTokenType{types.BRIDGE_TOKEN_TYPE_ERC20, types.BRIDGE_TOKEN_TYPE_ERC721, types.BRIDGE_TOKEN_TYPE_ERC404}
+	randomTokenType := bridgeTokenTypes[tmrand.Intn(len(bridgeTokenTypes))]
+	suite.Keeper().AddBridgeTokenWithTokenType(suite.ctx, tokenContract, denom, randomTokenType)
 
-	bridgeToken := &types.BridgeToken{Token: tokenContract, Denom: denom}
+	bridgeToken := &types.BridgeToken{Token: tokenContract, Denom: denom, TokenType: randomTokenType}
 	suite.EqualValues(bridgeToken, suite.Keeper().GetBridgeTokenDenom(suite.ctx, tokenContract))
 
 	suite.EqualValues(bridgeToken, suite.Keeper().GetDenomBridgeToken(suite.ctx, denom))

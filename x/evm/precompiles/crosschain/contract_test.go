@@ -82,7 +82,7 @@ func (suite *PrecompileTestSuite) SetupTest() {
 
 	helpers.AddTestAddr(suite.app, suite.ctx, suite.signer.AccAddress(), sdk.NewCoins(sdk.NewCoin(fxtypes.DefaultDenom, sdkmath.NewInt(10000).Mul(sdkmath.NewInt(1e18)))))
 
-	suite.app.EthKeeper.AddBridgeToken(suite.ctx, helpers.GenerateAddressByModule(crossethtypes.ModuleName), fxtypes.DefaultDenom)
+	suite.app.EthKeeper.AddBridgeToken(suite.ctx, helpers.GenerateAddressByModule(crossethtypes.ModuleName), fxtypes.DefaultDenom) // nolint:staticcheck
 
 	stakingContract, err := suite.app.EvmKeeper.DeployContract(suite.ctx, suite.signer.Address(), contract.MustABIJson(testscontract.CrossChainTestMetaData.ABI), contract.MustDecodeHex(testscontract.CrossChainTestMetaData.Bin))
 	suite.Require().NoError(err)

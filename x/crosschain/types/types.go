@@ -497,3 +497,10 @@ func (m *SnapshotOracle) GetTotalPower() uint64 {
 	}
 	return totalPower
 }
+
+func ValidateBridgeTokenType(value BridgeTokenType) error {
+	if value != BRIDGE_TOKEN_TYPE_ERC20 && value != BRIDGE_TOKEN_TYPE_ERC721 && value != BRIDGE_TOKEN_TYPE_ERC404 {
+		return errorsmod.Wrap(ErrInvalid, "bridge token type")
+	}
+	return nil
+}

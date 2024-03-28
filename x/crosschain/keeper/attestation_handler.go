@@ -76,7 +76,7 @@ func (k Keeper) AttestationHandler(ctx sdk.Context, externalClaim types.External
 		if isExist {
 			return errorsmod.Wrap(types.ErrInvalid, "bridge token is exist")
 		}
-		k.Logger(ctx).Info("add bridge token claim", "symbol", claim.Symbol, "token", claim.TokenContract, "channelIbc", claim.ChannelIbc)
+		k.Logger(ctx).Info("add bridge token claim", "symbol", claim.Symbol, "token", claim.TokenContract, "channelIbc", claim.ChannelIbc, "tokenType", claim.TokenType)
 		if claim.Symbol == types.NativeDenom {
 			// Check if denom exists
 			metadata, found := k.bankKeeper.GetDenomMetaData(ctx, claim.Symbol)
@@ -106,7 +106,7 @@ func (k Keeper) AttestationHandler(ctx sdk.Context, externalClaim types.External
 			}
 			// first to add origin token, update alias first
 			if len(metadata.DenomUnits[0].Aliases) == 0 {
-				k.AddBridgeToken(ctx, claim.TokenContract, claim.Symbol)
+				k.AddBridgeTokenWithTokenType(ctx, claim.TokenContract, claim.Symbol, claim.TokenType)
 				return nil
 			}
 
@@ -117,7 +117,7 @@ func (k Keeper) AttestationHandler(ctx sdk.Context, externalClaim types.External
 					types.ErrInvalid,
 					fmt.Sprintf("Token %s not exist in metadata", denom))
 			}
-			k.AddBridgeToken(ctx, claim.TokenContract, denom)
+			k.AddBridgeTokenWithTokenType(ctx, claim.TokenContract, denom, claim.TokenType)
 			return nil
 		}
 
@@ -125,7 +125,7 @@ func (k Keeper) AttestationHandler(ctx sdk.Context, externalClaim types.External
 		if err != nil {
 			return err
 		}
-		k.AddBridgeToken(ctx, claim.TokenContract, denom)
+		k.AddBridgeTokenWithTokenType(ctx, claim.TokenContract, denom, claim.TokenType)
 		k.Logger(ctx).Info("add bridge token success", "symbol", claim.Symbol, "token", claim.TokenContract, "denom", denom, "channelIbc", claim.ChannelIbc)
 
 	case *types.MsgOracleSetUpdatedClaim:

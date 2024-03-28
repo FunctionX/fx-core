@@ -51,12 +51,20 @@ message LastObservedBlockHeight {
   uint64 block_height = 2;
 }
 
+enum BridgeTokenType {
+  option (gogoproto.goproto_enum_prefix) = false;
+  BRIDGE_TOKEN_TYPE_ERC20 = 0;
+  BRIDGE_TOKEN_TYPE_ERC721 = 1;
+  BRIDGE_TOKEN_TYPE_ERC404 = 2;
+}
+
 // BridgeToken
 message BridgeToken {
   string token = 1;
   string denom = 2;
   //Deprecated: after upgrade v3
   string channel_ibc = 3;
+  BridgeTokenType token_type = 4;
 }
 
 // ClaimType is the cosmos type of an event from the counterpart chain that can

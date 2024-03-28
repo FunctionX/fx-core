@@ -772,6 +772,7 @@ func TestMsgBridgeTokenClaim_ValidateBasic(t *testing.T) {
 				EventNonce:     uint64(tmrand.Int63n(1000000000)),
 				BlockHeight:    uint64(tmrand.Int63n(1000000000)),
 				Decimals:       uint64(tmrand.Int63n(18)),
+				TokenType:      types.BRIDGE_TOKEN_TYPE_ERC404,
 			},
 			expectPass: true,
 		},
