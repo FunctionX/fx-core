@@ -1,5 +1,41 @@
 # Change log
 
+## [v7.5.0]
+
+### Enhancements and New Features
+
+* Support for Solidity Contract Bridge Call: Added functionality to enable bridge calls to Solidity contracts, enhancing interoperability across different blockchain networks.
+* Automatic Refund and bridgeCallback Interface: Introduced automatic refund mechanisms and the bridgeCallback interface to improve the efficiency and reliability of bridge transactions.
+* Pre-compiled Contracts Bridge Call: Enabled support for pre-compiled contracts to perform bridge calls, facilitating smoother and more efficient crosschain operations.
+* IBC Bridge Call to fxCore-EVM: Added support for IBC bridge calls to fxCore-EVM, expanding crosschain communication capabilities.
+* Pending Pool for Low Liquidity: Implemented a system to add crosschain requests to a pending pool when liquidity is low, ensuring transaction reliability even under constrained conditions.
+* Added fxcored export-delegates Command: This feature allows users to export all delegation records from the blockchain, excluding contract delegations.
+* Precompiled Staking v2 Contract: Introduced a new precompiled staking v2 contract, with v1 version to be deprecated in future releases.
+* Updated Interface Contract: Required a minimum Solidity version of 0.8.10. Contracts using versions prior to 0.8.10 will encounter errors when retrieving bytecode.
+* Refactored Precompiled Contracts: Improved execution efficiency of precompiled contracts.
+* New Governance Proposals:
+* MsgUpdateStore: Added to facilitate proposals to modify store.
+* MsgUpdateSwitchParams: Added to facilitate the development of precompiled contracts or specific Cosmos transaction types.
+* Metrics for Crosschain Module: Introduced new metrics for the crosschain module.
+
+### Bug Fixes
+
+* Zero Gas Attack on EVM Transactions: Fixed an issue where EVM transactions could be exploited with zero gas, preventing potential denial-of-service attacks and ensuring network stability.
+* State Rollback Error in Precompiled Contracts: Fixed a state rollback error where the on-chain state was not fully reverted when using try-catch for contract rollback.
+* Subgraph Contract Status: Fixed an issue where the subgraph was not retrieving contract status in some cases.
+
+### Upgrades
+
+* cosmos-sdk: Bumped to v0.47.13.
+* cometbft: Bumped to v0.37.9.
+* ibc-go: Bumped to v7.6.0.
+
+### Removals
+
+* Legacy Rest API: Removed the legacy REST API.
+
+---
+
 ## [v7.5.0-rc1]
 
 * Fixed gov MsgServer unregistered

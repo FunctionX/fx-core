@@ -120,6 +120,10 @@ func checkMainnetAndBlock(genesisDoc *tmtypes.GenesisDoc, config *tmcfg.Config) 
 			return errors.New("invalid version: The current block height is less than the v6.0.0 upgrade height(13_598_000)," +
 				" please use the v5.x.x version to synchronize the block or download the latest snapshot")
 		}
+		if blockStore.Height() < fxtypes.MainnetBlockHeightV7 {
+			return errors.New("invalid version: The current block height is less than the v7.5.0 upgrade height(16_838_000)," +
+				" please use the v6.x.x version to synchronize the block or download the latest snapshot")
+		}
 		return errors.New("invalid version: The current version is not released, please use the corresponding version")
 	}
 	return nil
