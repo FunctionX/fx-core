@@ -22,6 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -116,6 +117,8 @@ func New(
 
 	ibcmiddlewaretypes.RegisterLegacyAminoCodec(legacyAmino)
 	ibcmiddlewaretypes.RegisterInterfaces(interfaceRegistry)
+
+	legacy.Cdc = legacyAmino
 
 	// App Opts
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
